@@ -13,7 +13,9 @@
   "author": "Andy Farrell",
   "license": "ISC",
   "dependencies": {
+    "morgan": "^1.6",
     "express": "^4.13.3",
-    "jade": "^1.11.0"
+    "jade": "^1.11.0",
+    "multer": "^1.0"
   }
 }

@@ -2,5 +2,52 @@ doctype html
 html
   head
     title Stack Merge
+    link(rel="stylesheet", href="assets/css/main.css")
   body
     h1 Stack Merge
+
+    .image-stack.pane
+      .upload-controls.drop-target
+        button.choose
+          | + Choose images
+          input.choose(type="file", multiple)
+        p.hint You can also drag and drop images here to upload them.
+
+        ol.upload-list
+
+        button.upload.
+          &#8679; Upload
+
+        .uploading-overlay
+          button.cancel Cancel
+
+      ol.image-stack
+
+    .preview.pane
+      canvas.preview
+
+    script#template-stack-item(type='text/mustache').
+      {{# images }}
+      <li>
+        <input type="checkbox" id="thumb_{{ id }}" class="toggle">
+        <button class="remove">Remove</button>
+        <figure>
+          <div class="thumbnail">
+            <img src="{{ src }}" alt="{{ name }}">
+          </div>
+          <figcaption class="thumbnail-name">{{ name }}</figcaption>
+        </figure>
+      </li>
+      {{/ images }}
+
+    script(data-main='main', src='assets/javascript/lib/require.js')
+    script.
+      require.config({
+        baseUrl: '/assets/javascript',
+        paths: {
+          backbone: 'lib/backbone-min',
+          underscore: 'lib/underscore-min',
+          jquery: 'lib/jquery-2.1.4.min',
+          mustache: 'lib/mustache.min'
+        }
+      });
