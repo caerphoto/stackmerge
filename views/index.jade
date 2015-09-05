@@ -13,13 +13,18 @@ html
           input.choose(type="file", multiple)
         p.hint You can also drag and drop images here to upload them.
 
+        .drop-overlay
+          | Drop<br>images<br>here
+
         ol.upload-list
 
         button.upload.
           &#8679; Upload
 
         .uploading-overlay
-          button.cancel Cancel
+          button.cancel-upload Cancel
+
+        button.cancel-upload-selection Cancel
 
       ol.image-stack
 
@@ -29,12 +34,10 @@ html
     script#template-stack-item(type='text/mustache').
       {{# images }}
       <li>
-        <input type="checkbox" id="thumb_{{ id }}" class="toggle">
-        <button class="remove">Remove</button>
+        <input type="checkbox" data-id="{{ id }}" checked class="toggle">
+        <button class="remove" data-id="{{ id }}">Remove</button>
         <figure>
-          <div class="thumbnail">
-            <img src="{{ src }}" alt="{{ name }}">
-          </div>
+          <div class="thumbnail" style="background-image: url('{{ data }}')"></div>
           <figcaption class="thumbnail-name">{{ name }}</figcaption>
         </figure>
       </li>

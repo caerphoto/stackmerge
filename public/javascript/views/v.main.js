@@ -1,26 +1,26 @@
 define([
     'backbone',
     'underscore',
+    'collections/c.images',
     'views/v.images',
     'views/v.upload'
 ], function (
     Backbone,
     _,
+    ImagesCollection,
     ImagesView,
     UploadView
 ) {
     var MainView = Backbone.View.extend({
         el: 'body',
         initialize: function () {
-            this.imagesView = new ImagesView();
-            this.uploadsView = new UploadView({
-                onUpload: _.bind(this.uploadedHandler, this)
+            this.images = new ImagesCollection();
+            this.imagesView = new ImagesView({
+                images: this.images
             });
-        },
-        uploadedHandler: function (imagesData) {
-            console.log(this);
-            this.imagesView.images.add(imagesData);
-            this.imagesView.render();
+            this.uploadsView = new UploadView({
+                images: this.images
+            });
         }
     });
 

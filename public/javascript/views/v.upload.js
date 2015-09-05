@@ -1,53 +1,54 @@
 define([
-    'backbone',
-    'underscore'
+    'backbone'
 ], function (
-    Backbone,
-    _
+    Backbone
 ) {
     var UploadView = Backbone.View.extend({
         el: '.upload-controls',
         events: {
-            'change input.choose': 'renderUploadList',
-            'click .upload': 'uploadImages'
+            'click button.choose': 'showFilePicker',
+            'change input.choose': 'filesChosen',
+            'dragenter': 'onDragEnter',
+            'dragover': 'onDragOver',
+            'dragleave .drop-overlay': 'onDragLeave',
+            'drop': 'onDrop',
         },
         initialize: function (options) {
             this.elFileInput = this.$('input.choose').get(0);
-            this.elUploadList = this.$('ol.upload-list').get(0);
-            this.handleUploadData = options.onUpload;
+            //this.elUploadList = this.$('ol.upload-list').get(0);
+            this.images = options.images;
         },
-        renderUploadList: function () {
-            var html = '<li>';
-            var files = _.map(this.elFileInput.files, function (file) {
-                return file.name;
-            });
 
-            this.elUploadList.innerHTML = html + files.join('</li><li>') + '</li>';
-            this.$el.addClass('ready-to-upload');
+        // Custom methods
+        showFilePicker: function () {
+            this.elFileInput.click();
         },
-        uploadImages: function () {
-            var xhr = new XMLHttpRequest();
-            var formData = new FormData();
 
-            _.each(this.elFileInput.files, function (file) {
-                if (/image\//.test(file.type)) {
-                    formData.append('images', file, file.name);
-                }
-            });
+        onDragEnter: function (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            this.$el.addClass('dragging');
+        },
+        onDragOver: function (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        },
+        onDragLeave: function (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            this.$el.removeClass('dragging');
+        },
+        onDrop: function (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            this.images.addFromFiles(evt.originalEvent.dataTransfer.files);
+            this.$el.removeClass('dragging');
+        },
 
-            xhr.open('POST', 'upload', true);
-            xhr.onload = _.bind(function () {
-                if (xhr.status === 200) {
-                    this.handleUploadData(xhr.responseText);
-                } else {
-                    console.log(xhr.status, xhr.responseText);
-                }
-                this.$el.removeClass('uploading');
-            }, this);
-
-            this.$el.removeClass('ready-to-upload').addClass('uploading');
-            xhr.send(formData);
+        filesChosen: function () {
+            this.images.addFromFiles(this.elFileInput.files);
         }
+
     });
 
     return UploadView;

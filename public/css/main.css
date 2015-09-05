@@ -114,19 +114,46 @@ button:active {
 
 .image-stack.pane {
     left: 1em;
-    width: 16em;
+    width: 17em;
+    /*border-right: 1px solid #e00;*/
 }
 
 .preview.pane {
-    left: 16em;
-    margin-left: 2em;
+    left: 18em;
     right: 1em;
+    z-index: -1;
 }
 
 .upload-controls {
     border-bottom: 1px solid #eee;
     padding: 4em 1em 1em;
     position: relative;
+    width: 100%;
+    height: 9em;
+    z-index: 2;
+    background-color: #fff;
+}
+
+.upload-controls.ready-to-upload {
+    height: auto;
+    border-color: #ccc;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.upload-controls .drop-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+    font-size: 2rem;
+    line-height: 1;
+    border: 1rem solid #fb0;
+    color: #fb0;
+    background-color: #fff;
+    padding-top: 0.3rem;
 }
 
 .upload-controls .upload-list {
@@ -139,6 +166,10 @@ button:active {
 
 .upload-controls.ready-to-upload .hint {
     display: none;
+}
+
+.upload-controls.dragging .drop-overlay {
+    display: block;
 }
 
 .upload-controls button,
@@ -156,23 +187,25 @@ button:active {
     top: 1em;
     left: 50%;
     margin-left: -5em;
-    z-index: 1;
 }
 
 .upload-controls input.choose {
-    left: 0;
-    top: 0;
-    opacity: 0;
-    z-index: 2;
+    display: none;
 }
 
 .upload-controls p {
     text-align: center;
 }
 
-.upload-controls button.upload {
-    display: block;
+.upload-controls button.upload,
+.upload-controls button.cancel-upload-selection {
+    display: none;
     margin: 1em auto 0;
+}
+
+.upload-controls.ready-to-upload button.upload,
+.upload-controls.ready-to-upload button.cancel-upload-selection {
+    display: block;
 }
 
 .upload-controls .uploading-overlay {
@@ -199,10 +232,29 @@ button:active {
     margin-top: -1em;
 }
 
+/* IMAGE STACK */
+
+ol.image-stack {
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: absolute;
+    top: 9em;
+    left: 0;
+    width: 100%;
+    bottom: 0;
+}
+
 ol.image-stack li {
-    border-bottom: 1px solid #eee;
+    border-width: 1px;
+    border-style: solid;
+    border-color: transparent;
+    border-bottom-color: #eee;
     padding: 1em;
     position: relative;
+}
+
+ol.image-stack li:hover {
+    border-color: #fb0;
 }
 
 ol.image-stack figure {
@@ -213,7 +265,10 @@ ol.image-stack .thumbnail {
     width: 14em;
     height: 14em;
     border: 1px solid #eee;
-    /*box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);*/
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 ol.image-stack .toggle,

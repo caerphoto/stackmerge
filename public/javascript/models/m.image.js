@@ -9,8 +9,7 @@ define([
             id: '',
             width: 0,
             height: 0,
-            src: '',
-            element: null
+            data: null
         }
     });
 
