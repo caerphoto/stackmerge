@@ -14,13 +14,25 @@ define([
         initialize: function (options) {
             this.images = options.images;
             this.listenTo(this.images, 'add remove', this.render);
-            this.listenTo(this.images, 'change:data', this.render);
+            this.listenTo(this.images, 'change:image', this.updateImage);
         },
         render: function () {
             this.el.innerHTML = Mustache.render(
                 this.template,
                 { images: this.images.toJSON() }
             );
+
+            return this;
+        },
+        updateImage: function (model, image) {
+            var $caption = this.$('#thumb-' + model.id + ' figcaption');
+
+            if (image) {
+                $caption.before(image);
+            } else {
+                $caption.prev('img').remove();
+            }
+
         },
 
         removeImage: function (evt) {

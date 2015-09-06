@@ -33,11 +33,13 @@ html
 
     script#template-stack-item(type='text/mustache').
       {{# images }}
-      <li>
+      <li id="thumb-{{id}}">
         <input type="checkbox" data-id="{{ id }}" checked class="toggle">
         <button class="remove" data-id="{{ id }}">Remove</button>
         <figure>
-          <div class="thumbnail" style="background-image: url('{{ data }}')"></div>
+          {{# image }}
+          <img src="{{ image.src }}">
+          {{/ image }}
           <figcaption class="thumbnail-name">{{ name }}</figcaption>
         </figure>
       </li>

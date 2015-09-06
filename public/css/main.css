@@ -26,14 +26,21 @@ html {
 
 body {
     font-family: "Open Sans", sans-serif;
+    overflow: hidden;
 }
 
 h1 {
+    position: relative;
     text-align: center;
-    color: #fff;
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-    margin-top: 0.5rem;
+    background-color: #fb0;
+    color: #000;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+    margin: 0.5rem 1rem 0;
+    padding: 0.5rem;
+    border-bottom: 1px solid #b70;
     font-size: 2rem;
+
 }
 
 button,
@@ -56,11 +63,16 @@ input[type="password"] {
 input[type="checkbox"] {
     width: 1.4em;
     height: 1.4em;
-    border: 1px solid #bbb;
-    background-color: #fff8e0;
+    border: 1px solid #fb0;
+    background-color: #fff;
+    color: #fb0;
     cursor: pointer;
     border-radius: 4px;
     position: relative;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #fff8e0;
 }
 
 input[type="checkbox"]::after {
@@ -108,8 +120,9 @@ button:active {
     background-color: #fff;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     position: absolute;
-    top: 4em;
+    top: 4.3em;
     bottom: 1em;
+    z-index: -1;
 }
 
 .image-stack.pane {
@@ -121,7 +134,6 @@ button:active {
 .preview.pane {
     left: 18em;
     right: 1em;
-    z-index: -1;
 }
 
 .upload-controls {
@@ -261,14 +273,16 @@ ol.image-stack figure {
     margin: 2.5em auto 1em;
 }
 
-ol.image-stack .thumbnail {
-    width: 14em;
-    height: 14em;
-    border: 1px solid #eee;
+ol.image-stack img {
+    display: block;
+    max-width: 14em;
+    max-height: 14em;
+    border: 1px solid #ccc;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
 }
 
 ol.image-stack .toggle,
