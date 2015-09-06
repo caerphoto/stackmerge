@@ -11,11 +11,10 @@ define([
         model: ImageModel,
         imagesToLoad: 0,
         initialize: function () {
-            this.on('change:imageData', this.imageLoaded);
+            this.on('change:canvas', this.canvasReady);
         },
-        imageLoaded: function (model, imageData) {
-            if (imageData) {
-                console.log('loaded data for', model.get('name'), this.imagesToLoad, 'remaining');
+        canvasReady: function (model, canvas) {
+            if (canvas) {
                 this.imagesToLoad -= 1;
             }
 
