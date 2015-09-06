@@ -11,7 +11,9 @@ define([
             height: 0,
             file: null,
             image: null,
-            imageData: null
+            imageData: null,
+            canvas: null,
+            alpha: 255
         },
         initialize: function (attributes) {
             this.on('change:image', this.generateImageData);
@@ -29,7 +31,6 @@ define([
                 var image = document.createElement('img');
                 image.onload = function () {
                     this.set('image', image);
-                    console.log('image set for', this.get('name'));
                 }.bind(this);
                 image.src = evt.target.result;
             }.bind(this);
@@ -45,6 +46,31 @@ define([
             canvas.height = image.height;
             ctx.drawImage(image, 0, 0);
             this.set('imageData', ctx.getImageData(0, 0, image.width, image.height));
+            this.set('canvas', canvas);
+        },
+        modifyAlpha: function (a) {
+            var imageData = this.get('imageData');
+            var data = imageData.data;
+            var i, l;
+            var canvas;
+            var ctx;
+
+            if (this.get('alpha') === a) {
+                return;
+            }
+
+            for (i = 3, l = data.length; i < l; i += 4) {
+                data[i] = a;
+            }
+
+            this.set('alpha', a);
+
+            canvas = this.get('canvas');
+            ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.putImageData(imageData, 0, 0);
+
+            return imageData;
         }
     });
 

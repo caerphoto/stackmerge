@@ -308,12 +308,8 @@ ol.image-stack .remove {
 
 canvas.preview {
     border: 1px dotted #ccc;
-    position: absolute;
-    left: 50%;
-    width: 5em;
-    margin-left: -2.5em;
-    top: 50%;
-    height: 5em;
-    margin-top: -2.5em;
+    width: auto;
+    height: auto;
+    margin: auto;
     background-color: #888;
 }

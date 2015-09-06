@@ -3,22 +3,29 @@ define([
     'underscore',
     'collections/c.images',
     'views/v.images',
-    'views/v.upload'
+    'views/v.upload',
+    'views/v.preview'
 ], function (
     Backbone,
     _,
     ImagesCollection,
     ImagesView,
-    UploadView
+    UploadView,
+    PreviewView
 ) {
     var MainView = Backbone.View.extend({
         el: 'body',
+        views: {},
         initialize: function () {
             this.images = new ImagesCollection();
-            this.imagesView = new ImagesView({
+
+            this.views.images = new ImagesView({
                 images: this.images
             });
-            this.uploadsView = new UploadView({
+            this.views.uploads = new UploadView({
+                images: this.images
+            });
+            this.views.preview = new PreviewView({
                 images: this.images
             });
         }
