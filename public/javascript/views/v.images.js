@@ -20,6 +20,7 @@ define([
             this.listenTo(this.images, 'change:image', this.updateImage);
         },
         render: function () {
+            this.$el.parent().toggleClass('has-images', this.images.length > 0);
             this.el.innerHTML = Mustache.render(
                 this.template,
                 { images: this.images.toJSON() }

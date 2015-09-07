@@ -5,27 +5,22 @@ html
     link(rel="shortcut icon", type="image/png", href="/assets/favicon.png")
     link(rel="stylesheet", href="assets/css/main.css")
   body
-    h1 Stack Merge
+    header
+      button.choose
+        | + Choose images
+        input.choose(type="file", multiple)
 
-    .image-stack.pane
-      .upload-controls.drop-target
-        button.choose
-          | + Choose images
-          input.choose(type="file", multiple)
-        p.hint You can also drag and drop images here to load them.
+      h1 Stack Merge
 
-        .drop-overlay
-          | Drop<br>images<br>here
+      button.save
+        <i class="icon"></i>
+        | Save image
 
-        ol.upload-list
+    .image-stack.pane.drop-target
+      p.hint You can drag and drop images here to load them.
 
-        button.upload.
-          &#8679; Upload
-
-        .uploading-overlay
-          button.cancel-upload Cancel
-
-        button.cancel-upload-selection Cancel
+      .drop-overlay
+        p.drop-hint Drop<br>images<br>here
 
       ol.image-stack
 
@@ -33,7 +28,8 @@ html
       .working-overlay.dialog
         p Working&hellip;
         progress(min="0", max="100", value="0")
-      canvas.preview
+      .preview-scroller
+        canvas.preview
 
     script#template-stack-item(type='text/mustache').
       {{# images }}

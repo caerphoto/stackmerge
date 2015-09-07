@@ -4,18 +4,18 @@ define([
     Backbone
 ) {
     var UploadView = Backbone.View.extend({
-        el: '.upload-controls',
+        el: 'body',
         events: {
             'click button.choose': 'showFilePicker',
             'change input.choose': 'filesChosen',
-            'dragenter': 'onDragEnter',
-            'dragover': 'onDragOver',
-            'dragleave .drop-overlay': 'onDragLeave',
-            'drop': 'onDrop',
+            'dragenter .image-stack.pane': 'onDragEnter',
+            'dragover .image-stack.pane': 'onDragOver',
+            'dragleave .image-stack.pane': 'onDragLeave',
+            'drop .image-stack.pane': 'onDrop',
         },
         initialize: function (options) {
             this.elFileInput = this.$('input.choose').get(0);
-            //this.elUploadList = this.$('ol.upload-list').get(0);
+            this.$pane = this.$('.image-stack.pane');
             this.images = options.images;
         },
 
@@ -27,7 +27,7 @@ define([
         onDragEnter: function (evt) {
             evt.stopPropagation();
             evt.preventDefault();
-            this.$el.addClass('dragging');
+            this.$pane.addClass('dragging');
         },
         onDragOver: function (evt) {
             evt.stopPropagation();
@@ -36,13 +36,13 @@ define([
         onDragLeave: function (evt) {
             evt.stopPropagation();
             evt.preventDefault();
-            this.$el.removeClass('dragging');
+            this.$pane.removeClass('dragging');
         },
         onDrop: function (evt) {
             evt.stopPropagation();
             evt.preventDefault();
             this.images.addFromFiles(evt.originalEvent.dataTransfer.files);
-            this.$el.removeClass('dragging');
+            this.$pane.removeClass('dragging');
         },
 
         filesChosen: function () {
