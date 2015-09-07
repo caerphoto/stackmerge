@@ -20,7 +20,7 @@ app.use(function (req, res) {
     res.status(400).send();
 });
 
-server = app.listen(3000, function () {
+server = app.listen(8377, '127.0.0.1', function () {
     var host = server.address().address;
     var port = server.address().port;
 
