@@ -11,7 +11,7 @@ html
         button.choose
           | + Choose images
           input.choose(type="file", multiple)
-        p.hint You can also drag and drop images here to upload them.
+        p.hint You can also drag and drop images here to load them.
 
         .drop-overlay
           | Drop<br>images<br>here
@@ -33,10 +33,10 @@ html
 
     script#template-stack-item(type='text/mustache').
       {{# images }}
-      <li id="thumb-{{id}}">
-        <input type="checkbox" data-id="{{ id }}" checked class="toggle">
+      <li id="thumb-{{id}}" {{#visible}}class="using"{{/visible}}>
+        <input type="checkbox" data-id="{{ id }}" {{# visible }}checked{{/ visible }} class="toggle">
         <button class="remove" data-id="{{ id }}">Remove</button>
-        <figure>
+        <figure {{^canvas}}class="loading"{{/canvas}}>
           {{# image }}
           <img src="{{ image.src }}">
           {{/ image }}

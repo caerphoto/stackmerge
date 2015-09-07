@@ -27,9 +27,9 @@ define([
             }
         },
         addFromFiles: function (files) {
-            this.imagesToLoad = files.length;
+            this.imagesToLoad += files.length;
 
-            _.each(files, function (file) {
+            _.forEach(files, function (file) {
                 this.push({
                     name: file.name,
                     id: _.uniqueId('stackmerge_'),

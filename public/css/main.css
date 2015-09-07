@@ -270,7 +270,14 @@ ol.image-stack li:hover {
 }
 
 ol.image-stack figure {
-    margin: 2.5em auto 1em;
+    margin: 2.5em auto 0;
+    min-width: 14em;
+    min-height: 5em;
+    background: none;
+}
+
+ol.image-stack figure.loading {
+    background: url('/assets/media/loading-small-white-black.gif') center no-repeat;
 }
 
 ol.image-stack img {
@@ -282,7 +289,12 @@ ol.image-stack img {
     background-repeat: no-repeat;
     background-position: center;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-    margin: 0 auto;
+    margin: auto;
+    opacity: 0.5;
+}
+
+ol.image-stack .using img {
+    opacity: 1;
 }
 
 ol.image-stack .toggle,

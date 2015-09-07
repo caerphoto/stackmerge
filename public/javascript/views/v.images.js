@@ -1,8 +1,10 @@
 define([
     'backbone',
+    'jquery',
     'mustache'
 ], function (
     Backbone,
+    $,
     Mustache
 ) {
     var ImagesView = Backbone.View.extend({
@@ -30,8 +32,10 @@ define([
 
             if (image) {
                 $caption.before(image);
+                $caption.closest('figure').removeClass('loading');
             } else {
                 $caption.prev('img').remove();
+                $caption.closest('figure').addClass('loading');
             }
 
         },
@@ -41,6 +45,7 @@ define([
             var id = evt.target.getAttribute('data-id');
             var model = this.images.findWhere({ id: id });
             model.set('visible', visible);
+            $(evt.target).closest('li').toggleClass('using', visible);
         },
 
         removeImage: function (evt) {
