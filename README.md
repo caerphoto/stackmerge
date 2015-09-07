@@ -18,7 +18,7 @@ explained in [this Luminous Landscape article](https://luminous-landscape.com/ma
 
         node server.js
 
-4. Open `http://localhost:3000/` in your browser.
+4. Open <http://localhost:3000/> in your browser.
 
 ## Not done yet
 
