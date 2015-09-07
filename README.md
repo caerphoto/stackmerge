@@ -23,8 +23,6 @@ explained in [this Luminous Landscape article](https://luminous-landscape.com/ma
 ## Not done yet
 
 For now the app just blindly stacks images on top of each other using the first
-image's size as the base, and sets the opacity of each image to (1/n) where n is
-the number of images. Obviously this isn't final behaviour :)
-
-There's also not much in the way of UI: no way to re-order images, you can't
-save your work, etc.
+image's size as the base, and outputs the median of each pixel of each image. If
+the images aren't perfectly aligned, this will look weird. I need to add
+(possibly sub-pixel) alignment controls.
