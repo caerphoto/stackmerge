@@ -9,7 +9,8 @@ define([
         el: 'ol.image-stack',
         template: document.getElementById('template-stack-item').innerHTML,
         events: {
-            'click .remove': 'removeImage'
+            'click .remove': 'removeImage',
+            'change .toggle': 'toggleImageVisibility'
         },
         initialize: function (options) {
             this.images = options.images;
@@ -33,6 +34,13 @@ define([
                 $caption.prev('img').remove();
             }
 
+        },
+
+        toggleImageVisibility: function (evt) {
+            var visible = evt.target.checked;
+            var id = evt.target.getAttribute('data-id');
+            var model = this.images.findWhere({ id: id });
+            model.set('visible', visible);
         },
 
         removeImage: function (evt) {

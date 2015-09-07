@@ -10,7 +10,7 @@ define([
         model: new PreviewModel(),
         initialize: function (options) {
             this.images = options.images;
-            this.listenTo(this.images, 'imagesLoaded remove', this.render);
+            this.listenTo(this.images, 'imagesLoaded remove change:visible', this.render);
         },
         render: function () {
             //var bufferCanvas = this.model.get('canvas');
@@ -36,11 +36,10 @@ define([
             outputCtx.clearRect(0, 0, this.el.width, this.el.height);
             this.images.each(function (model) {
                 var canvas = model.get('canvas');
-                if (canvas) {
+                var offset = model.get('offset');
+                if (canvas && model.get('visible')) {
                     model.modifyAlpha(alpha);
-                    outputCtx.drawImage(canvas, 0, 0);
-                } else {
-                    console.log('skipping', model.get('name'));
+                    outputCtx.drawImage(canvas, offset.x, offset.y);
                 }
             });
 

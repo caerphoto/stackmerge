@@ -7,13 +7,13 @@ define([
         defaults: {
             name: 'unnamed image',
             id: '',
-            width: 0,
-            height: 0,
+            visible: true,
             file: null,
             image: null,
             imageData: null,
             canvas: null,
-            alpha: 255
+            alpha: 255,
+            offset: { x: 0, y: 0 }
         },
         initialize: function (attributes) {
             this.on('change:image', this.generateImageData);
