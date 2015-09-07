@@ -1,8 +1,6 @@
 var express = require('express');
 var app = express();
 var morgan = require('morgan');
-var multer = require('multer');
-var upload = multer({ dest: 'uploads/' });
 var server;
 
 app.set('view engine', 'jade');
@@ -13,19 +11,7 @@ app.get('/', function (req, res) {
     res.render('index');
 });
 
-app.post('/upload', upload.array('images'), function (req, res) {
-    var files = req.files.map(function (file) {
-        return {
-            name: file.originalname,
-            src: file.path
-        };
-    });
-
-    res.status(200).send(files);
-});
-
-app.use('/uploads', express.static(__dirname + '/uploads'));
-
+app.get('/favicon.ico', express.static(__dirname + '/public'));
 app.use('/assets', express.static(__dirname + '/public'));
 
 // Handle 404s - this only gets called if none of the routes above send a

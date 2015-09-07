@@ -1,12 +1,10 @@
 define([
     'backbone',
     'underscore',
-    'quicksort',
     'models/m.image'
 ], function (
     Backbone,
     _,
-    quicksort,
     ImageModel
 ) {
     var ImagesCollection = Backbone.Collection.extend({
@@ -25,6 +23,7 @@ define([
 
             if (this.imagesToLoad === 0) {
                 setTimeout(function () {
+                    console.timeEnd('loading');
                     this.trigger('imagesLoaded');
                 }.bind(this), 0);
             }
@@ -36,6 +35,7 @@ define([
         addFromFiles: function (files) {
             this.imagesToLoad += files.length;
 
+            console.time('loading');
             _.forEach(files, function (file) {
                 this.push({
                     name: file.name,
@@ -44,7 +44,7 @@ define([
                 });
             }, this);
         },
-        getVisibleImages: function (ready) {
+        getVisible: function (ready) {
             return this.filter(function (model) {
                 return ready ?
                     model.get('visible') && model.get('canvas') !== null :
@@ -53,10 +53,10 @@ define([
         },
 
         getCombinedImageData: function (done) {
-            var allData = _.map(this.getVisibleImages(true), function (model) {
+            var allData = _.map(this.getVisible(true), function (model) {
                 return model.get('imageData');
             });
-            if (!_.every(this.getVisibleImages(), function (model) {
+            if (!_.every(this.getVisible(), function (model) {
                 return model.get('canvas') !== null;
             })) {
                 return null;
@@ -70,16 +70,29 @@ define([
                 this.worker.terminate();
                 this.worker = new Worker(this.workerPath);
             }
+
             this.worker.onmessage = function (message) {
                 if (message.data.width) {
                     this.working = false;
                     done(message.data);
-                } else {
+                } else if (typeof message.data === 'number') {
                     this.trigger('progress', message.data);
                 }
             }.bind(this);
+
             this.working = true;
-            this.worker.postMessage(allData);
+
+            allData.forEach(function (imageData) {
+                var buffer = imageData.data.buffer.slice();
+                this.worker.postMessage(buffer, [buffer]);
+            }, this);
+
+            this.worker.postMessage({
+                width: allData[0].width,
+                height: allData[0].height
+            });
+
+            this.worker.postMessage('start');
         }
     });
 

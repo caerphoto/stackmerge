@@ -2,6 +2,9 @@
 /* Quicksort implementation from
 * http://blog.mgechev.com/2012/11/24/javascript-sorting-performance-quicksort-v8/
 */
+var allPixels = [];
+var width, height;
+
 function swap(array, i, j) {
     var temp = array[i];
     array[i] = array[j];
@@ -32,52 +35,47 @@ function quickSort(array, left, right) {
     return array;
 }
 
-function qs(array) {
-    return quickSort(array, 0, array.length);
-}
-
-function mergeImages(allData) {
-    var allPixels = allData.map(function (data) {
-        return data.data;
-    });
+function mergeImages() {
     var combined = new Uint8ClampedArray(allPixels[0].length);
 
     var pixelByte;
-    var numBytes = combined.length;
 
     var imageIndex;
-    var numImages = allData.length;
+    var numImages = allPixels.length;
     var r = new Uint8ClampedArray(numImages);
-    var g = new Uint8ClampedArray(numImages);
-    var b = new Uint8ClampedArray(numImages);
     var medianIndex = Math.floor(numImages / 2);
 
     var onePercent = Math.floor(combined.length / 100);
 
-    for (pixelByte = 0; pixelByte < numBytes; pixelByte += 4) {
-        for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
-            r[imageIndex] = allPixels[imageIndex][pixelByte];
-            g[imageIndex] = allPixels[imageIndex][pixelByte + 1];
-            b[imageIndex] = allPixels[imageIndex][pixelByte + 2];
+    pixelByte = combined.length;
+    while (pixelByte--) {
+        if ((pixelByte + 1) % 4 === 0) {
+            combined[pixelByte] = 255;
+        } else {
+            imageIndex = numImages;
+            while (imageIndex--) {
+                r[imageIndex] = allPixels[imageIndex][pixelByte];
+            }
+
+            combined[pixelByte] = quickSort(r, 0, numImages)[medianIndex];
         }
 
-        combined[pixelByte] = qs(r)[medianIndex];
-        combined[pixelByte + 1] = qs(g)[medianIndex];
-        combined[pixelByte + 2] = qs(b)[medianIndex];
-        combined[pixelByte + 3] = 255;
-
         if (pixelByte % onePercent === 0) {
-            postMessage(pixelByte / onePercent);
+            postMessage(100 - pixelByte / onePercent);
         }
     }
 
-    postMessage(new ImageData(
-        combined,
-        allData[0].width,
-        allData[0].height
-    ));
+    allPixels = [];
+    postMessage(new ImageData(combined, width, height));
 }
 
 onmessage = function (message) {
-    mergeImages(message.data);
+    if (message.data === 'start') {
+        mergeImages();
+    } else if (message.data.byteLength) {
+        allPixels.push(new Uint8ClampedArray(message.data));
+    } else {
+        width = message.data.width;
+        height = message.data.height;
+    }
 };
