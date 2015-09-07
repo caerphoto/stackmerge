@@ -134,6 +134,7 @@ button:active {
 .preview.pane {
     left: 18em;
     right: 1em;
+    overflow: scroll;
 }
 
 .upload-controls {

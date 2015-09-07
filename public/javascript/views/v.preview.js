@@ -18,21 +18,18 @@ define([
             var outputCtx = this.el.getContext('2d');
             var visibleImages;
             var firstImage;
-            var alpha;
+
+            outputCtx.clearRect(0, 0, this.el.width, this.el.height);
 
             if (this.images.length === 0) {
                 return this;
             }
 
-            visibleImages = this.images.filter(function (model) {
-                return model.get('visible');
-            });
+            visibleImages = this.images.getVisibleImages();
 
             if (visibleImages.length === 0) {
                 return this;
             }
-
-            alpha = Math.floor(255 / visibleImages.length);
 
             firstImage = visibleImages[0].get('image');
 
@@ -43,15 +40,7 @@ define([
             this.el.width = firstImage.naturalWidth;
             this.el.height = firstImage.naturalHeight;
 
-            outputCtx.clearRect(0, 0, this.el.width, this.el.height);
-            _.forEach(visibleImages, function (model) {
-                var canvas = model.get('canvas');
-                var offset = model.get('offset');
-                if (canvas && model.get('visible')) {
-                    model.modifyAlpha(alpha);
-                    outputCtx.drawImage(canvas, offset.x, offset.y);
-                }
-            });
+            outputCtx.putImageData(this.images.getCombinedImageData(), 0, 0);
 
             return this;
         }
