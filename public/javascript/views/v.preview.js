@@ -19,8 +19,6 @@ define([
             var visibleImages;
             var firstImage;
 
-            outputCtx.clearRect(0, 0, this.el.width, this.el.height);
-
             if (this.images.length === 0) {
                 return this;
             }
@@ -39,8 +37,13 @@ define([
 
             this.el.width = firstImage.naturalWidth;
             this.el.height = firstImage.naturalHeight;
+            this.$el.parent().addClass('working');
 
-            outputCtx.putImageData(this.images.getCombinedImageData(), 0, 0);
+            this.images.getCombinedImageData(function (data) {
+                this.$el.parent().removeClass('working');
+                outputCtx.clearRect(0, 0, this.el.width, this.el.height);
+                outputCtx.putImageData(data, 0, 0);
+            }.bind(this));
 
             return this;
         }

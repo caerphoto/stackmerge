@@ -326,3 +326,26 @@ canvas.preview {
     margin: auto;
     background-color: #888;
 }
+
+.preview.pane .working-overlay {
+    display: none;
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: 20em;
+    height: 6em;
+    margin-left: -10em;
+    margin-top: -3em;
+    background-image: url('/assets/media/loading-bar-white-orange.gif');
+    background-position: center 70%;
+    background-repeat: no-repeat;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+    padding-top: 1em;
+    text-align: center;
+}
+
+.preview.pane.working .working-overlay {
+    display: block;
+}

@@ -1,4 +1,3 @@
-/*global ImageData */
 define([
     'backbone',
     'underscore',
@@ -13,6 +12,7 @@ define([
     var ImagesCollection = Backbone.Collection.extend({
         model: ImageModel,
         imagesToLoad: 0,
+        workerPath: '/assets/javascript/median_worker.js',
         initialize: function () {
             this.on('change:canvas', this.canvasReady);
         },
@@ -22,7 +22,9 @@ define([
             }
 
             if (this.imagesToLoad === 0) {
-                this.trigger('imagesLoaded');
+                setTimeout(function () {
+                    this.trigger('imagesLoaded');
+                }.bind(this), 0);
             }
 
             if (this.imagesToLoad < 0) {
@@ -47,49 +49,29 @@ define([
                     model.get('visible');
             });
         },
-        getCombinedImageData: function () {
+
+        getCombinedImageData: function (done) {
             var allData = _.map(this.getVisibleImages(true), function (model) {
                 return model.get('imageData');
             });
-            var allPixels = _.map(allData, function (data) {
-                return data.data;
-            });
-            var combined = new Uint8ClampedArray(allPixels[0].length);
-
-            var pixelByte;
-            var numBytes = combined.length;
-
-            var imageIndex;
-            var numImages = allData.length;
-            var r = new Uint8ClampedArray(numImages);
-            var g = new Uint8ClampedArray(numImages);
-            var b = new Uint8ClampedArray(numImages);
-            var medianIndex = Math.floor(numImages / 2);
-
             if (!_.every(this.getVisibleImages(), function (model) {
                 return model.get('canvas') !== null;
             })) {
                 return null;
             }
 
-            for (pixelByte = 0; pixelByte < numBytes; pixelByte += 4) {
-                for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
-                    r[imageIndex] = allPixels[imageIndex][pixelByte];
-                    g[imageIndex] = allPixels[imageIndex][pixelByte + 1];
-                    b[imageIndex] = allPixels[imageIndex][pixelByte + 2];
-                }
-
-                combined[pixelByte] = quicksort(r)[medianIndex];
-                combined[pixelByte + 1] = quicksort(g)[medianIndex];
-                combined[pixelByte + 2] = quicksort(b)[medianIndex];
-                combined[pixelByte + 3] = 255;
+            if (!_.isFunction(done)) {
+                return null;
             }
 
-            return new ImageData(
-                combined,
-                allData[0].width,
-                allData[0].height
-            );
+            if (this.worker) {
+                this.worker.terminate();
+            }
+            this.worker = new Worker(this.workerPath);
+            this.worker.onmessage = function (message) {
+                done(message.data);
+            };
+            this.worker.postMessage(allData);
         }
     });
 
