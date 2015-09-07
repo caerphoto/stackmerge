@@ -43,12 +43,19 @@ h1 {
 
 }
 
+.dialog,
 button,
 input[type="text"],
 input[type="number"],
 input[type="password"] {
     border: 1px solid #aaa;
     padding: 0.4em 0.7em;
+}
+
+button,
+input[type="text"],
+input[type="number"],
+input[type="password"] {
     border-radius: 2px;
     display: inline-block;
 }
@@ -89,6 +96,11 @@ input[type="checkbox"]::after {
 
 input[type="checkbox"]:checked::after {
     content: "\2716";
+}
+
+.dialog {
+    background-color: #eee;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
 button {
@@ -336,14 +348,13 @@ canvas.preview {
     height: 6em;
     margin-left: -10em;
     margin-top: -3em;
-    background-image: url('/assets/media/loading-bar-white-orange.gif');
-    background-position: center 70%;
-    background-repeat: no-repeat;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
     padding-top: 1em;
     text-align: center;
+}
+
+.working-overlay progress {
+    display: block;
+    margin: 1em auto;
 }
 
 .preview.pane.working .working-overlay {

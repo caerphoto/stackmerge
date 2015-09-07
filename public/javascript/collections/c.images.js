@@ -15,6 +15,8 @@ define([
         workerPath: '/assets/javascript/median_worker.js',
         initialize: function () {
             this.on('change:canvas', this.canvasReady);
+            this.worker = new Worker(this.workerPath);
+            this.working = false;
         },
         canvasReady: function (model, canvas) {
             if (canvas) {
@@ -64,13 +66,19 @@ define([
                 return null;
             }
 
-            if (this.worker) {
+            if (this.working) {
                 this.worker.terminate();
+                this.worker = new Worker(this.workerPath);
             }
-            this.worker = new Worker(this.workerPath);
             this.worker.onmessage = function (message) {
-                done(message.data);
-            };
+                if (message.data.width) {
+                    this.working = false;
+                    done(message.data);
+                } else {
+                    this.trigger('progress', message.data);
+                }
+            }.bind(this);
+            this.working = true;
             this.worker.postMessage(allData);
         }
     });

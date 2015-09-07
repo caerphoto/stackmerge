@@ -8,14 +8,17 @@ define([
     PreviewModel
 ) {
     var PreviewView = Backbone.View.extend({
-        el: 'canvas.preview',
+        el: '.preview.pane',
         model: new PreviewModel(),
         initialize: function (options) {
             this.images = options.images;
+            this.canvas = this.$('canvas').get(0);
             this.listenTo(this.images, 'imagesLoaded remove change:visible', this.render);
+            this.progressBar = this.$('.working-overlay progress').get(0);
+            this.listenTo(this.images, 'progress', this.updateProgress);
         },
         render: function () {
-            var outputCtx = this.el.getContext('2d');
+            var outputCtx = this.canvas.getContext('2d');
             var visibleImages;
             var firstImage;
 
@@ -35,17 +38,23 @@ define([
                 return this;
             }
 
-            this.el.width = firstImage.naturalWidth;
-            this.el.height = firstImage.naturalHeight;
-            this.$el.parent().addClass('working');
+            this.canvas.width = firstImage.naturalWidth;
+            this.canvas.height = firstImage.naturalHeight;
+            this.$el.addClass('working');
+            this.progressBar.value = 0;
 
+            console.profile('getCombinedImageData');
             this.images.getCombinedImageData(function (data) {
-                this.$el.parent().removeClass('working');
-                outputCtx.clearRect(0, 0, this.el.width, this.el.height);
+                console.profileEnd();
+                this.$el.removeClass('working');
+                outputCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 outputCtx.putImageData(data, 0, 0);
             }.bind(this));
 
             return this;
+        },
+        updateProgress: function (progress) {
+            this.progressBar.value = progress;
         }
     });
 

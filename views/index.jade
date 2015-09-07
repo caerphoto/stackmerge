@@ -29,8 +29,9 @@ html
       ol.image-stack
 
     .preview.pane
-      .working-overlay
-        | Working&hellip;
+      .working-overlay.dialog
+        p Working&hellip;
+        progress(min="0", max="100", value="0")
       canvas.preview
 
     script#template-stack-item(type='text/mustache').

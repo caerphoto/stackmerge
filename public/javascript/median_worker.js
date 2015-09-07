@@ -52,6 +52,8 @@ function mergeImages(allData) {
     var b = new Uint8ClampedArray(numImages);
     var medianIndex = Math.floor(numImages / 2);
 
+    var onePercent = Math.floor(combined.length / 100);
+
     for (pixelByte = 0; pixelByte < numBytes; pixelByte += 4) {
         for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
             r[imageIndex] = allPixels[imageIndex][pixelByte];
@@ -63,6 +65,10 @@ function mergeImages(allData) {
         combined[pixelByte + 1] = qs(g)[medianIndex];
         combined[pixelByte + 2] = qs(b)[medianIndex];
         combined[pixelByte + 3] = 255;
+
+        if (pixelByte % onePercent === 0) {
+            postMessage(pixelByte / onePercent);
+        }
     }
 
     postMessage(new ImageData(
