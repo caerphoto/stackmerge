@@ -36,44 +36,39 @@ function quickSort(array, left, right) {
 }
 
 function mergeImages() {
-    var combined = new Uint8ClampedArray(allPixels[0].length);
+    var combined = new Uint32Array(allPixels[0].length);
 
-    var pixelByte;
+    var pixel;
 
     var imageIndex;
     var numImages = allPixels.length;
-    var stackPixels = new Uint8ClampedArray(numImages);
+    var stackPixels = new Uint32Array(numImages);
     var medianIndex = Math.floor(numImages / 2);
 
     var onePercent = Math.floor(combined.length / 100);
 
-    pixelByte = combined.length;
-    while (pixelByte--) {
-        if ((pixelByte + 1) % 4 === 0) {
-            combined[pixelByte] = 255;
-        } else {
-            imageIndex = numImages;
-            while (imageIndex--) {
-                stackPixels[imageIndex] = allPixels[imageIndex][pixelByte];
-            }
-
-            combined[pixelByte] = quickSort(stackPixels, 0, numImages)[medianIndex];
+    pixel = combined.length;
+    while (pixel--) {
+        imageIndex = numImages;
+        while (imageIndex--) {
+            stackPixels[imageIndex] = allPixels[imageIndex][pixel];
         }
+        combined[pixel] = quickSort(stackPixels, 0, numImages)[medianIndex];
 
-        if (pixelByte % onePercent === 0) {
-            postMessage(100 - pixelByte / onePercent);
+        if (pixel % onePercent === 0) {
+            postMessage(100 - pixel / onePercent);
         }
     }
 
     allPixels = [];
-    postMessage(new ImageData(combined, width, height));
+    postMessage(new ImageData(new Uint8ClampedArray(combined.buffer), width, height));
 }
 
 onmessage = function (message) {
     if (message.data === 'start') {
         mergeImages();
     } else if (message.data.byteLength) {
-        allPixels.push(new Uint8ClampedArray(message.data));
+        allPixels.push(new Uint32Array(message.data));
     } else {
         width = message.data.width;
         height = message.data.height;
