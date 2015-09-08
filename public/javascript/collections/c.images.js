@@ -13,8 +13,6 @@ define([
         workerPath: '/assets/javascript/median_worker.js',
         initialize: function () {
             this.on('change:imageData', this.imageDataReady);
-            this.worker1 = new Worker(this.workerPath);
-            this.worker2 = new Worker(this.workerPath);
             this.working = false;
         },
         imageDataReady: function (model, imageData) {
@@ -46,6 +44,9 @@ define([
             }, this);
         },
         getVisible: function (ready) {
+            if (this.length === 0) {
+                return [];
+            }
             return this.filter(function (model) {
                 return ready ?
                     model.get('visible') && model.get('imageData') !== null :
@@ -97,8 +98,7 @@ define([
             }
 
             if (this.working) {
-                this.worker1.terminate();
-                this.worker2.terminate();
+                this.terminateWorkers();
             }
 
             this.worker1 = new Worker(this.workerPath);
@@ -132,6 +132,14 @@ define([
 
             this.worker1.postMessage('start');
             this.worker2.postMessage('start');
+        },
+        terminateWorkers: function () {
+            if (this.worker1) {
+                this.worker1.terminate();
+            }
+            if (this.worker2) {
+                this.worker2.terminate();
+            }
         }
     });
 

@@ -8,7 +8,8 @@ define([
     var PreviewView = Backbone.View.extend({
         el: '.preview.pane',
         events: {
-            'click .refresh': 'render'
+            'click .refresh': 'render',
+            'click .cancel': 'cancelProcessing'
         },
         initialize: function (options) {
             this.images = options.images;
@@ -62,13 +63,9 @@ define([
             var visibleImages;
             var firstImage;
 
-            if (this.images.length === 0) {
-                return this;
-            }
-
             visibleImages = this.images.getVisible();
-
-            if (visibleImages.length === 0) {
+            this.$el.toggleClass('has-images', visibleImages.length > 0);
+            if (this.images.length === 0 && visibleImages.length === 0) {
                 return this;
             }
 
@@ -98,6 +95,10 @@ define([
                 progress = parseInt(this.progressBar.value, 10) + 1;
             }
             this.progressBar.value = progress;
+        },
+        cancelProcessing: function () {
+            this.$el.removeClass('working');
+            this.images.terminateWorkers();
         }
     });
 

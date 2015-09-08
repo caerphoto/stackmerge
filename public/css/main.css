@@ -280,15 +280,19 @@ ol.image-stack figure.loading {
     background: url('/assets/media/loading-small-white-black.gif') center no-repeat;
 }
 
+ol.image-stack img,
+canvas.preview {
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+}
+
 ol.image-stack img {
     display: block;
     max-width: 14em;
     max-height: 14em;
-    border: 1px solid #ccc;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     margin: auto;
     opacity: 0.5;
 }
@@ -325,14 +329,18 @@ ol.image-stack .remove {
     left: 0;
     bottom: 0;
     overflow: scroll;
-    z-index: 0;
 }
 
 canvas.preview {
+    display: none;
     width: auto;
     height: auto;
     margin: auto;
     background-color: #888;
+}
+
+.preview.pane.has-images canvas.preview {
+    display: block;
 }
 
 .preview.pane .working-overlay {
@@ -341,10 +349,10 @@ canvas.preview {
     top: 50%;
     left: 50%;
     width: 20em;
-    height: 6em;
+    height: 8.4em;
     margin-left: -10em;
-    margin-top: -3em;
-    padding-top: 1em;
+    margin-top: -4.2em;
+    padding: 1em 1.5em;
     text-align: center;
     z-index: 1;
 }
@@ -352,8 +360,25 @@ canvas.preview {
 .working-overlay progress {
     display: block;
     margin: 1em auto;
+    width: auto;
 }
 
 .preview.pane.working .working-overlay {
     display: block;
+}
+
+.preview.pane .controls {
+    display: none;
+    position: relative;
+    margin: 1em;
+    opacity: 0.3;
+    z-index: 1;
+}
+
+.preview.pane.has-images .controls {
+    display: inline-block;
+}
+
+.preview.pane .controls:hover {
+    opacity: 1;
 }
