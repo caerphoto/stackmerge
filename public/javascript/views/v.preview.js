@@ -81,16 +81,22 @@ define([
             this.$el.addClass('working');
             this.progressBar.value = 0;
 
-            console.time('processing');
-            this.images.getCombinedImageData(function (data) {
-                console.timeEnd('processing');
+            console.time('generate combined image');
+            this.images.generateCombinedImageData(function (data) {
+                console.timeEnd('generate combined image');
                 this.$el.removeClass('working');
                 outputCtx.putImageData(data, 0, 0);
             }.bind(this));
 
             return this;
         },
-        updateProgress: function (progress) {
+        updateProgress: function (reset) {
+            var progress;
+            if (reset) {
+                progress = 0;
+            } else {
+                progress = parseInt(this.progressBar.value, 10) + 1;
+            }
             this.progressBar.value = progress;
         }
     });

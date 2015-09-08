@@ -8,11 +8,8 @@ define([
             name: 'unnamed image',
             id: '',
             visible: true,
-            file: null,
             image: null,
             imageData: null,
-            canvas: null,
-            alpha: 255,
             offset: { x: 0, y: 0 }
         },
         initialize: function (attributes) {
@@ -46,7 +43,6 @@ define([
             canvas.height = image.height;
             ctx.drawImage(image, 0, 0);
             this.set('imageData', ctx.getImageData(0, 0, image.width, image.height));
-            this.set('canvas', canvas);
         }
     });
 
