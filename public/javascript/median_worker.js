@@ -42,7 +42,7 @@ function mergeImages() {
 
     var imageIndex;
     var numImages = allPixels.length;
-    var r = new Uint8ClampedArray(numImages);
+    var stackPixels = new Uint8ClampedArray(numImages);
     var medianIndex = Math.floor(numImages / 2);
 
     var onePercent = Math.floor(combined.length / 100);
@@ -54,10 +54,10 @@ function mergeImages() {
         } else {
             imageIndex = numImages;
             while (imageIndex--) {
-                r[imageIndex] = allPixels[imageIndex][pixelByte];
+                stackPixels[imageIndex] = allPixels[imageIndex][pixelByte];
             }
 
-            combined[pixelByte] = quickSort(r, 0, numImages)[medianIndex];
+            combined[pixelByte] = quickSort(stackPixels, 0, numImages)[medianIndex];
         }
 
         if (pixelByte % onePercent === 0) {
