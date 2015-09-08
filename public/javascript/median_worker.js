@@ -1,38 +1,53 @@
 /*global postMessage, onmessage:true, ImageData */
-/* Quicksort implementation from
-* http://blog.mgechev.com/2012/11/24/javascript-sorting-performance-quicksort-v8/
-*/
 var allPixels = [];
 var width, height;
 
-function swap(array, i, j) {
-    var temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
-    return array;
+/* Fast median algorithm adapted from C# example at
+ * http://www.i-programmer.info/babbages-bag/505-quick-median.html?start=1
+ */
+function split(array, splitVal, left, right) {
+    var temp;
+    // do the left and right scan until the pointers cross
+    do {
+        // scan from the left then scan from the right
+        while (array[left] < splitVal) {
+            left += 1;
+        }
+        while (splitVal < array[right]) {
+            right -= 1;
+        }
+        // now swap values if they are in the wrong part:
+        if (left <= right) {
+            temp = array[left];
+            array[left] = array[right];
+            array[right] = temp;
+
+            left += 1;
+            right -= 1;
+        }
+        //and continue the scan until the pointers cross:
+    } while (left <= right);
+
+    return [left, right];
 }
 
-function partition(array, left, right) {
-    var cmp = array[right - 1],
-        minEnd = left,
-        maxEnd;
-    for (maxEnd = left; maxEnd < right - 1; maxEnd += 1) {
-        if (array[maxEnd] <= cmp) {
-            swap(array, maxEnd, minEnd);
-            minEnd += 1;
+function fastMedian(array, length, mid) {
+    var left = 0;
+    var right = length - 1;
+    var endpoints;
+    var midVal;
+    while (left < right) {
+        midVal = array[mid];
+        endpoints = split(array, midVal, left, right);
+        if (endpoints[1] < mid) {
+            left = endpoints[0];
+        }
+        if (mid < endpoints[0]){
+            right = endpoints[1];
         }
     }
-    swap(array, minEnd, right - 1);
-    return minEnd;
-}
 
-function quickSort(array, left, right) {
-    if (left < right) {
-        var p = partition(array, left, right);
-        quickSort(array, left, p);
-        quickSort(array, p + 1, right);
-    }
-    return array;
+    return array[mid];
 }
 
 function mergeImages() {
@@ -46,7 +61,6 @@ function mergeImages() {
     var numImages = allPixels.length;
     var stackPixels = new Uint8ClampedArray(numImages);
     var medianIndex = floor(numImages / 2);
-    var evenLength = numImages % 2 === 0;
 
     var onePercent = floor(combined.length / 100);
 
@@ -61,14 +75,7 @@ function mergeImages() {
                 stackPixels[imageIndex] = allPixels[imageIndex][b];
             }
 
-            stackPixels = quickSort(stackPixels, 0, numImages);
-            if (evenLength) {
-                combined[b] = floor(
-                    (stackPixels[medianIndex - 1] + stackPixels[medianIndex]) / 2
-                );
-            } else {
-                combined[b] = stackPixels[medianIndex];
-            }
+            combined[b] = fastMedian(stackPixels, numImages, medianIndex);
         }
 
         if (b % onePercent === 0) {
