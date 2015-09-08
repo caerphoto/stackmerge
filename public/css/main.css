@@ -25,7 +25,7 @@ html {
 }
 
 body {
-    font-family: "Open Sans", sans-serif;
+    font-family: "Open Sans", "Lucida Grande", "Segoe UI", "Ubuntu", "Roboto", sans-serif;
     overflow: hidden;
 }
 
@@ -217,7 +217,7 @@ button.save .icon {
 .image-stack.pane .hint {
     text-align: center;
     color: #aaa;
-    padding: 2em;
+    padding: 2em 1.5em;
 }
 
 .image-stack.pane.has-images .hint {
