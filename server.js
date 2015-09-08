@@ -4,14 +4,20 @@ var morgan = require('morgan');
 var server;
 
 app.set('view engine', 'jade');
-app.use(morgan('dev'));
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(morgan('combined'));
+} else {
+    app.use(morgan('dev'));
+}
 
 app.get('/', function (req, res) {
-    console.log('Rendering index view');
     res.render('index');
 });
 
 app.get('/favicon.ico', express.static(__dirname + '/public'));
+
+// Recommended in production to let Apache/nginx handle serving assets.
 app.use('/assets', express.static(__dirname + '/public'));
 
 // Handle 404s - this only gets called if none of the routes above send a
