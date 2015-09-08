@@ -38,30 +38,41 @@ function quickSort(array, left, right) {
 function mergeImages() {
     var combined = new Uint8ClampedArray(allPixels[0].length);
 
-    var pixelByte;
+    var floor = Math.floor; // Slight optimisation - avoids property lookup
+
+    var b;
 
     var imageIndex;
     var numImages = allPixels.length;
     var stackPixels = new Uint8ClampedArray(numImages);
-    var medianIndex = Math.floor(numImages / 2);
+    var medianIndex = floor(numImages / 2);
+    var evenLength = numImages % 2 === 0;
 
-    var onePercent = Math.floor(combined.length / 100);
+    var onePercent = floor(combined.length / 100);
 
-    pixelByte = combined.length;
-    while (pixelByte--) {
-        if ((pixelByte + 1) % 4 === 0) {
-            combined[pixelByte] = 255;
+    b = combined.length;
+    while (b--) {
+        if ((b + 1) % 4 === 0) {
+            // Alpha channel is always 255
+            combined[b] = 255;
         } else {
             imageIndex = numImages;
             while (imageIndex--) {
-                stackPixels[imageIndex] = allPixels[imageIndex][pixelByte];
+                stackPixels[imageIndex] = allPixels[imageIndex][b];
             }
 
-            combined[pixelByte] = quickSort(stackPixels, 0, numImages)[medianIndex];
+            stackPixels = quickSort(stackPixels, 0, numImages);
+            if (evenLength) {
+                combined[b] = floor(
+                    (stackPixels[medianIndex - 1] + stackPixels[medianIndex]) / 2
+                );
+            } else {
+                combined[b] = stackPixels[medianIndex];
+            }
         }
 
-        if (pixelByte % onePercent === 0) {
-            postMessage(100 - pixelByte / onePercent);
+        if (b % onePercent === 0) {
+            postMessage(100 - b / onePercent);
         }
     }
 
