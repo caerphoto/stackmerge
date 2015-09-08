@@ -15,8 +15,6 @@ app.get('/', function (req, res) {
     res.render('index');
 });
 
-app.get('/favicon.ico', express.static(__dirname + '/public'));
-
 // Recommended in production to let Apache/nginx handle serving assets.
 app.use('/assets', express.static(__dirname + '/public'));
 
