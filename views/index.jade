@@ -45,6 +45,15 @@ html
       </li>
       {{/ images }}
 
+    footer
+      p
+        | By 
+        a(href="http://andyf.me") Andy Farrell
+        |  &middot; source available 
+        a(href="https://github.com/caerphoto/stackmerge") on GitHub
+        |  &middot; inspired by 
+        a(href="https://luminous-landscape.com/making-people-and-other-things-go-away/") this Luminous Landscape article
+
     if (process.env.NODE_ENV === 'production')
       script(data-main="main", src="/assets/javascript/main.built.js")
     else

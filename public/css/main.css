@@ -41,6 +41,25 @@ header {
     z-index: 3;
 }
 
+footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 0 0.5rem;
+    line-height: 1.4rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: #444;
+    border-top: 1px solid #aaa;
+    height: 1.6rem;
+}
+
+a {
+    color: #000;
+}
+
 h1 {
     text-align: center;
     font-size: 2rem;
@@ -168,7 +187,8 @@ button.save .icon {
     background-color: #fff;
     position: absolute;
     top: 4em;
-    bottom: 0;
+    bottom: 1.6em;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.2);
 }
 
 .image-stack.pane {
