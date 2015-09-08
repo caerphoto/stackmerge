@@ -83,7 +83,7 @@ define([
             this.working = true;
 
             allData.forEach(function (imageData) {
-                var buffer = imageData.data.buffer.slice();
+                var buffer = imageData.data.buffer.slice(0);
                 this.worker.postMessage(buffer, [buffer]);
             }, this);
 
