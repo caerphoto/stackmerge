@@ -3,6 +3,8 @@
 A web app for merging images, keeping only the pixels they have in common, as
 explained in [this Luminous Landscape article](https://luminous-landscape.com/making-people-and-other-things-go-away/).
 
+Demo available at <http://stackmerge.andyf.me/>
+
 ## Install and run
 
 1. Clone this repo:
@@ -16,13 +18,15 @@ explained in [this Luminous Landscape article](https://luminous-landscape.com/ma
 
 3. Start the server:
 
-        node server.js
+        npm start
 
-4. Open <http://localhost:3000/> in your browser.
+4. Open <http://localhost:8377/> in your browser.
 
 ## Not done yet
 
 For now the app just blindly stacks images on top of each other using the first
-image's size as the base, and outputs the median of each pixel of each image. If
-the images aren't perfectly aligned, this will look weird. I need to add
-(possibly sub-pixel) alignment controls.
+image's size as the base, and outputs the median of all the source pixels at
+easch location in image. If the images aren't perfectly aligned, the result will
+look slightly mushy, like it's had overly zealous noise reduction applied. I
+need to add (possibly sub-pixel) alignment controls to alleviate this, but
+that's... non-trivial.

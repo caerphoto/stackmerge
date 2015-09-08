@@ -1,21 +1,26 @@
 {
   "name": "StackMerge",
-  "version": "1.0.0",
-  "description": "Merge a stack of photos by excluding outlier pixels.",
+  "version": "1.1.0",
+  "description": "Merge a stack of photos by taking the median of several source images.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "photo",
-    "merge"
+    "merge",
+    "stack",
+    "median"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:caerphoto/stackmerge.git"
+  },
   "author": "Andy Farrell",
   "license": "ISC",
   "dependencies": {
     "morgan": "^1.6",
     "express": "^4.13.3",
-    "jade": "^1.11.0",
-    "multer": "^1.0"
+    "jade": "^1.11.0"
   }
 }
