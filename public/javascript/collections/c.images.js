@@ -82,10 +82,12 @@ define([
 
             this.working = true;
 
+            console.time('copy data to worker');
             allData.forEach(function (imageData) {
                 var buffer = imageData.data.buffer.slice(0);
                 this.worker.postMessage(buffer, [buffer]);
             }, this);
+            console.timeEnd('copy data to worker');
 
             this.worker.postMessage({
                 width: allData[0].width,
