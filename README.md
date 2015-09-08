@@ -1,7 +1,12 @@
 # Stack Merge
 
 A web app for merging images, keeping only the pixels they have in common, as
-explained in [this Luminous Landscape article](https://luminous-landscape.com/making-people-and-other-things-go-away/).
+explained in [this Luminous Landscape
+article](https://luminous-landscape.com/making-people-and-other-things-go-away/).
+That page also has some demo image sets you can download, but I recommend
+resizing them down to something web-appropriate (e.g. 1000 pixels across) first,
+as loading ten 24 megapixel images into a browser is rather slow. It does work
+though, eventually.
 
 Demo available at <http://stackmerge.andyf.me/>
 
