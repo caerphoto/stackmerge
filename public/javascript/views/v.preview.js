@@ -1,15 +1,12 @@
 define([
     'backbone',
     'underscore',
-    'models/m.preview'
 ], function (
     Backbone,
-    _,
-    PreviewModel
+    _
 ) {
     var PreviewView = Backbone.View.extend({
         el: '.preview.pane',
-        model: new PreviewModel(),
         events: {
             'click .refresh': 'render'
         },
@@ -24,11 +21,41 @@ define([
             this.listenTo(this.images, 'imagesLoaded', this.setCanvasSize);
             this.progressBar = this.$('.working-overlay progress').get(0);
             this.listenTo(this.images, 'progress', this.updateProgress);
+
+            window.addEventListener('resize', _.debounce(this.recenterCanvas, 60).bind(this));
         },
         setCanvasSize: function () {
             var firstImage = this.images.getVisible()[0].get('image');
+
+            // Setting canvas.width sets the *logical* canvas width, not it's
+            // visual width, which is set with canvas.style.width.
             this.canvas.width = firstImage.naturalWidth;
             this.canvas.height = firstImage.naturalHeight;
+
+            this.recenterCanvas();
+        },
+        recenterCanvas: function () {
+            var scroller = this.el.querySelector('.preview-scroller');
+            var paneSize = {
+                width: scroller.clientWidth,
+                height: scroller.clientHeight
+            };
+
+            if (this.canvas.width < paneSize.width) {
+                this.canvas.style.marginLeft =
+                    ((paneSize.width - this.canvas.width) / 2) + 'px';
+            } else {
+                this.canvas.style.marginLeft = 0;
+            }
+
+            if (this.canvas.height < paneSize.height) {
+                this.canvas.style.marginTop =
+                    ((paneSize.height - this.canvas.height) / 2) + 'px';
+            } else {
+                this.canvas.style.marginTop = 0;
+            }
+
+
         },
         render: function () {
             var outputCtx = this.canvas.getContext('2d');

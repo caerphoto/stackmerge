@@ -9,9 +9,9 @@ define([
             'click button.choose': 'showFilePicker',
             'change input.choose': 'filesChosen',
             'dragenter .image-stack.pane': 'onDragEnter',
-            'dragover .image-stack.pane': 'onDragOver',
-            'dragleave .image-stack.pane': 'onDragLeave',
-            'drop .image-stack.pane': 'onDrop',
+            'dragover .drop-overlay': 'onDragOver',
+            'dragleave .drop-overlay': 'onDragLeave',
+            'drop .drop-overlay': 'onDrop',
             'click .save': 'saveImage'
         },
         initialize: function (options) {

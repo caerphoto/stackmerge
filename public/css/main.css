@@ -3,7 +3,7 @@ html, body,
 h1, h2, h3, h4,
 input, button,
 canvas,
-p, div, span, figure, figcaption,
+p, div, span, figure, figcaption, header,
 ul, ol, li {
     padding: 0;
     margin: 0;
@@ -34,11 +34,11 @@ header {
     color: #000;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-    margin: 0.5rem 1rem 0;
     padding: 0;
     height: 4rem;
     border-bottom: 1px solid #b70;
     position: relative;
+    z-index: 3;
 }
 
 h1 {
@@ -166,24 +166,22 @@ button.save .icon {
 
 .pane {
     background-color: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     position: absolute;
-    top: 4.5em;
-    bottom: 1em;
-    z-index: -1;
-    border-top: 1px solid #888;
+    top: 4em;
+    bottom: 0;
 }
 
 .image-stack.pane {
-    left: 1em;
+    left: 0;
     width: 17em;
     overflow: visible;
 }
 
 .preview.pane {
-    left: 18em;
-    right: 1em;
+    left: 17em;
+    right: 0;
     overflow: hidden;
+    border-left: 1px solid #eee;
 }
 
 
@@ -197,6 +195,7 @@ button.save .icon {
     border: 1rem solid #fb0;
     color: #fb0;
     background-color: #fff;
+    z-index: 1;
 }
 
 .drop-hint {
@@ -310,7 +309,6 @@ ol.image-stack .remove {
 }
 
 canvas.preview {
-    border: 1px dotted #ccc;
     width: auto;
     height: auto;
     margin: auto;
@@ -320,7 +318,7 @@ canvas.preview {
 .preview.pane .working-overlay {
     display: none;
     position: absolute;
-    top: 30%;
+    top: 50%;
     left: 50%;
     width: 20em;
     height: 6em;
