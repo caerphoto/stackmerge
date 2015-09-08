@@ -45,14 +45,17 @@ html
       </li>
       {{/ images }}
 
-    script(data-main='main', src='assets/javascript/lib/require.js')
-    script.
-      require.config({
-        baseUrl: '/assets/javascript',
-        paths: {
-          backbone: 'lib/backbone-min',
-          underscore: 'lib/underscore-min',
-          jquery: 'lib/jquery-2.1.4.min',
-          mustache: 'lib/mustache.min'
-        }
-      });
+    if (process.env.NODE_ENV === 'production')
+      script(data-main="main", src="/assets/javascript/main.built.js")
+    else
+      script(data-main="main", src="assets/javascript/lib/require.js")
+      script.
+        require.config({
+          baseUrl: '/assets/javascript',
+          paths: {
+            backbone: 'lib/backbone-min',
+            underscore: 'lib/underscore-min',
+            jquery: 'lib/jquery-2.1.4.min',
+            mustache: 'lib/mustache.min'
+          }
+        });

@@ -27,6 +27,7 @@ app.use(function (req, res) {
 server = app.listen(8377, '127.0.0.1', function () {
     var host = server.address().address;
     var port = server.address().port;
+    var env = process.env.NODE_ENV;
 
-    console.log('App listening at http://%s:%s', host, port);
+    console.log('App listening at http://%s:%s in %s env', host, port, env);
 });
