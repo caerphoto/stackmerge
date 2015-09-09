@@ -14,6 +14,7 @@ define([
         initialize: function () {
             this.on('change:imageData', this.imageDataReady);
             this.working = false;
+            this.cachedBuffer = null;
         },
         imageDataReady: function (model, imageData) {
             if (imageData) {
@@ -36,7 +37,7 @@ define([
 
             console.time('load images');
             _.forEach(files, function (file) {
-                this.push({
+                _.defer(this.push.bind(this), {
                     name: file.name,
                     id: _.uniqueId('stackmerge_'),
                     file: file
@@ -56,18 +57,17 @@ define([
 
         concatBuffers: function (buffers) {
             var tmp = new Uint8Array(buffers[0].byteLength + buffers[1].byteLength);
-            tmp.set(new Uint8Array(buffers[0]), 0 );
+            tmp.set(new Uint8Array(buffers[0]), 0);
             tmp.set(new Uint8Array(buffers[1]), buffers[0].byteLength);
-            return tmp;
+            return tmp.buffer;
         },
 
         callbackIfComplete: function (callback) {
-            var completeBuffer;
-
+            var buffer;
             if (this.processedBuffers[0] && this.processedBuffers[1]) {
-                completeBuffer = this.concatBuffers(this.processedBuffers);
+                buffer = this.concatBuffers(this.processedBuffers);
                 callback(new ImageData(
-                    new Uint8ClampedArray(completeBuffer),
+                    new Uint8ClampedArray(buffer),
                     this.imageSize.width,
                     this.imageSize.height
                 ));

@@ -54,8 +54,8 @@ define([
             }
 
             var link = document.createElement('a');
+            var canvas = document.querySelector('.preview-image');
             var evt;
-            var canvas = document.querySelector('canvas.preview');
 
             var now = new Date();
             var dateParts = [now.getMonth() + 1, now.getDate()].map(padDigits);
@@ -64,16 +64,15 @@ define([
                 now.getMinutes(),
                 now.getSeconds()
             ].map(padDigits).join('-');
-            var filename;
             dateParts = [now.getFullYear()].concat(dateParts).join('-');
-            filename = [
+
+            link.download = [
                 'StackMerge',
                 dateParts,
                 timeParts
             ].join(' ');
 
-            link.download = filename;
-            link.href = canvas.toDataURL();
+            link.href = canvas.toDataURL('image/jpeg', 0.8);
             evt = document.createEvent('MouseEvents');
             evt.initMouseEvent('click', true, true, window,
                 0, 0, 0, 0, 0,

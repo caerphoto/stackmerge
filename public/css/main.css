@@ -281,7 +281,7 @@ ol.image-stack figure.loading {
 }
 
 ol.image-stack img,
-canvas.preview {
+.preview-image {
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     border: 1px solid #ccc;
 }
@@ -331,7 +331,7 @@ ol.image-stack .remove {
     overflow: scroll;
 }
 
-canvas.preview {
+.preview-image {
     display: none;
     width: auto;
     height: auto;
@@ -339,7 +339,7 @@ canvas.preview {
     background-color: #888;
 }
 
-.preview.pane.has-images canvas.preview {
+.preview.pane.has-images .preview-image {
     display: block;
 }
 

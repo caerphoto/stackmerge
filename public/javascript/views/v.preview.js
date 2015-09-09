@@ -11,55 +11,62 @@ define([
             'click .refresh': 'render',
             'click .cancel': 'cancelProcessing'
         },
+        previewSize: {
+            width: 0,
+            height: 0
+        },
         initialize: function (options) {
             this.images = options.images;
-            this.canvas = this.$('canvas').get(0);
+            this.elPreviewImage = this.$('.preview-image').get(0);
             this.listenTo(
                 this.images,
                 'imagesLoaded remove change:visible',
                 this.render
             );
-            this.listenTo(this.images, 'imagesLoaded', this.setCanvasSize);
+            this.listenTo(this.images, 'imagesLoaded', this.setPreviewSize);
             this.progressBar = this.$('.working-overlay progress').get(0);
             this.listenTo(this.images, 'progress', this.updateProgress);
 
-            window.addEventListener('resize', _.debounce(this.recenterCanvas, 60).bind(this));
+            window.addEventListener('resize', _.debounce(this.recenterPreview, 60).bind(this));
         },
-        setCanvasSize: function () {
+        setPreviewSize: function () {
             var firstImage = this.images.getVisible()[0].get('image');
+
+            this.previewSize.width = firstImage.naturalWidth;
+            this.previewSize.height = firstImage.naturalHeight;
 
             // Setting canvas.width sets the *logical* canvas width, not it's
             // visual width, which is set with canvas.style.width.
-            this.canvas.width = firstImage.naturalWidth;
-            this.canvas.height = firstImage.naturalHeight;
+            this.elPreviewImage.width = this.previewSize.width;
+            this.elPreviewImage.height = this.previewSize.height;
 
-            this.recenterCanvas();
+            this.recenterPreview();
         },
-        recenterCanvas: function () {
+        recenterPreview: function () {
             var scroller = this.el.querySelector('.preview-scroller');
             var paneSize = {
                 width: scroller.clientWidth,
                 height: scroller.clientHeight
             };
 
-            if (this.canvas.width < paneSize.width) {
-                this.canvas.style.marginLeft =
-                    ((paneSize.width - this.canvas.width) / 2) + 'px';
+            if (this.previewSize.width < paneSize.width) {
+                this.elPreviewImage.style.marginLeft =
+                    ((paneSize.width - this.previewSize.width) / 2) + 'px';
             } else {
-                this.canvas.style.marginLeft = 0;
+                this.elPreviewImage.style.marginLeft = 0;
             }
 
-            if (this.canvas.height < paneSize.height) {
-                this.canvas.style.marginTop =
-                    ((paneSize.height - this.canvas.height) / 2) + 'px';
+            if (this.previewSize.height < paneSize.height) {
+                this.elPreviewImage.style.marginTop =
+                    ((paneSize.height - this.previewSize.height) / 2) + 'px';
             } else {
-                this.canvas.style.marginTop = 0;
+                this.elPreviewImage.style.marginTop = 0;
             }
 
 
         },
         render: function () {
-            var outputCtx = this.canvas.getContext('2d');
+            var outputCtx = this.elPreviewImage.getContext('2d');
             var visibleImages;
             var firstImage;
 

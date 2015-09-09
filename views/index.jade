@@ -7,7 +7,7 @@ html
   body
     header
       button.choose
-        | + Add images
+        | + Add images&hellip;
         input.choose(type="file", multiple)
 
       h1 Stack Merge
@@ -34,14 +34,14 @@ html
         button.refresh Refresh
 
       .preview-scroller
-        canvas.preview
+        canvas.preview-image
 
     script#template-stack-item(type='text/mustache').
       {{# images }}
       <li id="thumb-{{id}}" {{#visible}}class="using"{{/visible}}>
         <input type="checkbox" data-id="{{ id }}" {{# visible }}checked{{/ visible }} class="toggle">
         <button class="remove" data-id="{{ id }}">Remove</button>
-        <figure {{^canvas}}class="loading"{{/canvas}}>
+        <figure {{^imageData}}class="loading"{{/imageData}}>
           {{# image }}
           <img src="{{ image.src }}">
           {{/ image }}
