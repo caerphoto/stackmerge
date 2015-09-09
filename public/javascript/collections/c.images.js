@@ -25,7 +25,7 @@ define([
                 setTimeout(function () {
                     console.timeEnd('load images');
                     this.trigger('imagesLoaded');
-                }.bind(this), 0);
+                }.bind(this), 50);
             }
 
             if (this.imagesToLoad < 0) {

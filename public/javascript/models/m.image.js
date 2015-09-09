@@ -17,27 +17,24 @@ define([
             this.readFileData(attributes.file);
         },
         readFileData: function (file) {
-            var reader;
+            var url;
+            var image;
             if (!file) {
                 this.set('image', null);
                 return;
             }
 
-            reader = new FileReader();
-            reader.onload = function (evt) {
-                var image = document.createElement('img');
-                image.onload = function () {
-                    this.set('image', image);
-                }.bind(this);
-                image.src = evt.target.result;
+            url = URL.createObjectURL(file);
+            image = document.createElement('img');
+            image.onload = function () {
+                this.set('image', image);
+                URL.revokeObjectURL(url);
             }.bind(this);
-
-            reader.readAsDataURL(file);
+            image.src = url;
         },
-        generateImageData: function () {
+        generateImageData: function (model, image) {
             var canvas = document.createElement('canvas');
             var ctx = canvas.getContext('2d');
-            var image = this.get('image');
 
             canvas.width = image.width;
             canvas.height = image.height;
