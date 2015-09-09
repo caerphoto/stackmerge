@@ -99,6 +99,7 @@ input[type="checkbox"] {
     cursor: pointer;
     border-radius: 4px;
     position: relative;
+    vertical-align: -0.2em;
 }
 
 input[type="checkbox"]:checked {
@@ -119,6 +120,37 @@ input[type="checkbox"]::after {
 
 input[type="checkbox"]:checked::after {
     content: "\2716";
+}
+
+label {
+    position: relative;
+    color: #000;
+    display: inline-block;
+}
+
+label[for] {
+    cursor: pointer;
+}
+
+.controls label {
+    color: #fb0;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.controls label::after {
+    content: " ";
+    position: absolute;
+    width: 90%;
+    height: 0;
+    left: 5%;
+    top: 50%;
+    box-shadow: 0 0 1em 3px #000;
+    z-index: -1;
+    opacity: 0.8;
+}
+
+.controls label:hover::after {
+    opacity: 1;
 }
 
 .dialog {
@@ -339,6 +371,11 @@ ol.image-stack .remove {
     background-color: #888;
 }
 
+.zoom-to-fit .preview-image {
+    max-height: 100%;
+    max-width: 100%;
+}
+
 .preview.pane.has-images .preview-image {
     display: block;
 }
@@ -370,9 +407,16 @@ ol.image-stack .remove {
 .preview.pane .controls {
     display: none;
     position: relative;
-    margin: 1em;
+    padding: 1em;
     opacity: 0.3;
     z-index: 1;
+}
+
+.controls button {
+    margin-right: 1.5em;
+}
+.controls input {
+    margin-right: 0.5em;
 }
 
 .preview.pane.has-images .controls {

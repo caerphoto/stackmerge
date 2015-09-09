@@ -9,7 +9,8 @@ define([
         el: '.preview.pane',
         events: {
             'click .refresh': 'render',
-            'click .cancel': 'cancelProcessing'
+            'click .cancel': 'cancelProcessing',
+            'click #zoom-to-fit': 'toggleZoom'
         },
         previewSize: {
             width: 0,
@@ -42,23 +43,30 @@ define([
 
             this.recenterPreview();
         },
-        recenterPreview: function () {
+        recenterPreview: function (zoomToFit) {
             var scroller = this.el.querySelector('.preview-scroller');
             var paneSize = {
                 width: scroller.clientWidth,
                 height: scroller.clientHeight
             };
+            // The -2 is to account for the image's 1px borders
+            var computedHeight = zoomToFit ?
+                this.elPreviewImage.getBoundingClientRect().height - 2 :
+                this.previewSize.height;
+            var computedWidth = zoomToFit ?
+                this.elPreviewImage.getBoundingClientRect().width - 2 :
+                this.previewSize.width;
 
-            if (this.previewSize.width < paneSize.width) {
+            if (zoomToFit || this.previewSize.width < paneSize.width) {
                 this.elPreviewImage.style.marginLeft =
-                    ((paneSize.width - this.previewSize.width) / 2) + 'px';
+                    ((paneSize.width - computedWidth) / 2) + 'px';
             } else {
                 this.elPreviewImage.style.marginLeft = 0;
             }
 
-            if (this.previewSize.height < paneSize.height) {
+            if (zoomToFit || this.previewSize.height < paneSize.height) {
                 this.elPreviewImage.style.marginTop =
-                    ((paneSize.height - this.previewSize.height) / 2) + 'px';
+                    ((paneSize.height - computedHeight) / 2) + 'px';
             } else {
                 this.elPreviewImage.style.marginTop = 0;
             }
@@ -106,6 +114,10 @@ define([
         cancelProcessing: function () {
             this.$el.removeClass('working');
             this.images.terminateWorkers();
+        },
+        toggleZoom: function (evt) {
+            this.$el.toggleClass('zoom-to-fit', evt.target.checked);
+            this.recenterPreview(evt.target.checked);
         }
     });
 
