@@ -1,7 +1,7 @@
 ({
     // Config options for use with the r.js optimiser
     name: 'main',
-    out: './public/javascript/main.built.js',
+    out: './public/javascript/main.built.20150910.js',
     baseUrl: './public/javascript/',
 
     paths: {
