@@ -10,7 +10,7 @@ define([
     var ImagesCollection = Backbone.Collection.extend({
         model: ImageModel,
         imagesToLoad: 0,
-        workerPath: '/assets/javascript/median_worker.js',
+        workerPath: '/assets/javascript/workers/median_processor.js',
         initialize: function () {
             this.on('change:imageData', this.imageDataReady);
             this.working = false;
@@ -37,19 +37,19 @@ define([
 
             console.time('load images');
             _.forEach(files, function (file) {
-                _.defer(this.push.bind(this), {
+                this.push({
                     name: file.name,
                     id: _.uniqueId('stackmerge_'),
                     file: file
                 });
             }, this);
         },
-        getVisible: function (ready) {
+        getVisible: function (onlyReady) {
             if (this.length === 0) {
                 return [];
             }
             return this.filter(function (model) {
-                return ready ?
+                return onlyReady ?
                     model.get('visible') && model.get('imageData') !== null :
                     model.get('visible');
             });

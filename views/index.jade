@@ -40,13 +40,12 @@ html
 
     script#template-stack-item(type='text/mustache').
       {{# images }}
-      <li id="thumb-{{id}}" {{#visible}}class="using"{{/visible}}>
+      <li id="thumbnail-{{id}}" class="{{#visible}}using {{/visible}} {{^thumbnailURL}}loading {{/thumbnailURL}}">
         <input type="checkbox" data-id="{{ id }}" {{# visible }}checked{{/ visible }} class="toggle">
         <button class="remove" data-id="{{ id }}">Remove</button>
-        <figure {{^imageData}}class="loading"{{/imageData}}>
-          {{# image }}
-          <img src="{{ image.src }}">
-          {{/ image }}
+        <figure>
+          <div class="loading-spinner"></div>
+          <img src="{{ thumbnailURL }}">
           <figcaption class="thumbnail-name">{{ name }}</figcaption>
         </figure>
       </li>

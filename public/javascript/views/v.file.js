@@ -56,6 +56,7 @@ define([
             var link = document.createElement('a');
             var canvas = document.querySelector('.preview-image');
             var evt;
+            var url;
 
             var now = new Date();
             var dateParts = [now.getMonth() + 1, now.getDate()].map(padDigits);
@@ -72,13 +73,26 @@ define([
                 timeParts
             ].join(' ');
 
-            link.href = canvas.toDataURL('image/jpeg', 0.8);
             evt = document.createEvent('MouseEvents');
             evt.initMouseEvent('click', true, true, window,
                 0, 0, 0, 0, 0,
                 false, false, false, false,
                 0, null);
-            link.dispatchEvent(evt);
+
+            // toBlob() is much higher performance, and doesn't have the size
+            // limitations of toDataURL(), but when I wrote this only Firefox
+            // supported it.
+            if (canvas.toBlob) {
+                canvas.toBlob(function (blob) {
+                    url = URL.createObjectURL(blob);
+                    link.href = url;
+                    link.dispatchEvent(evt);
+                    URL.revokeObjectURL(url);
+                });
+            } else {
+                link.href = canvas.toDataURL('image/jpeg', 0.8);
+                link.dispatchEvent(evt);
+            }
         }
 
     });

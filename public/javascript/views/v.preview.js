@@ -31,10 +31,10 @@ define([
             window.addEventListener('resize', _.debounce(this.recenterPreview, 60).bind(this));
         },
         setPreviewSize: function () {
-            var firstImage = this.images.getVisible()[0].get('image');
+            var firstImage = this.images.getVisible()[0].get('imageData');
 
-            this.previewSize.width = firstImage.naturalWidth;
-            this.previewSize.height = firstImage.naturalHeight;
+            this.previewSize.width = firstImage.width;
+            this.previewSize.height = firstImage.height;
 
             // Setting canvas.width sets the *logical* canvas width, not it's
             // visual width, which is set with canvas.style.width.
@@ -51,10 +51,10 @@ define([
             };
             // The -2 is to account for the image's 1px borders
             var computedHeight = zoomToFit ?
-                this.elPreviewImage.getBoundingClientRect().height - 2 :
+                this.elPreviewImage.getBoundingClientRect().height + 2 :
                 this.previewSize.height;
             var computedWidth = zoomToFit ?
-                this.elPreviewImage.getBoundingClientRect().width - 2 :
+                this.elPreviewImage.getBoundingClientRect().width + 2 :
                 this.previewSize.width;
 
             if (zoomToFit || this.previewSize.width < paneSize.width) {
@@ -84,7 +84,7 @@ define([
                 return this;
             }
 
-            firstImage = visibleImages[0].get('image');
+            firstImage = visibleImages[0].get('imageData');
 
             if (!firstImage) {
                 return this;

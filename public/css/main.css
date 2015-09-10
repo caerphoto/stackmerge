@@ -308,10 +308,7 @@ ol.image-stack figure {
     background: none;
 }
 
-ol.image-stack figure.loading {
-    background: url('/assets/media/loading-small-white-black.gif') center no-repeat;
-}
-
+ol.image-stack .loading-spinner,
 ol.image-stack img,
 .preview-image {
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
@@ -331,6 +328,21 @@ ol.image-stack img {
 
 ol.image-stack .using img {
     opacity: 1;
+}
+
+ol.image-stack .loading img {
+    display: none;
+}
+
+ol.image-stack .loading-spinner {
+    display: none;
+}
+
+ol.image-stack .loading .loading-spinner {
+    display: block;
+    height: 64px;
+    width: 100%;
+    background: url('/assets/media/loading-small-white-black.gif') center no-repeat;
 }
 
 ol.image-stack .toggle,

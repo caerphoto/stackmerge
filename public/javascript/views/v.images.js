@@ -17,7 +17,7 @@ define([
         initialize: function (options) {
             this.images = options.images;
             this.listenTo(this.images, 'add remove', this.render);
-            this.listenTo(this.images, 'change:image', this.updateImage);
+            this.listenTo(this.images, 'change:thumbnailURL', this.updateThumb);
         },
         render: function () {
             this.$el.parent().toggleClass('has-images', this.images.length > 0);
@@ -28,19 +28,14 @@ define([
 
             return this;
         },
-        updateImage: function (model, image) {
-            var $caption = this.$('#thumb-' + model.id + ' figcaption');
+        updateThumb: function (model, url) {
+            var $li = this.$('#thumbnail-' + model.id);
+            var $image = $li.find('img');
 
-            if (image) {
-                $caption.before(image);
-                $caption.closest('figure').removeClass('loading');
-            } else {
-                $caption.prev('img').remove();
-                $caption.closest('figure').addClass('loading');
-            }
+            $image.attr('src', url);
+            $li.toggleClass('loading', url === '');
 
         },
-
         toggleImageVisibility: function (evt) {
             var visible = evt.target.checked;
             var id = evt.target.getAttribute('data-id');
