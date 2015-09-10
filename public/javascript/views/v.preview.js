@@ -21,7 +21,7 @@ define([
             this.elPreviewImage = this.$('.preview-image').get(0);
             this.listenTo(
                 this.images,
-                'imagesLoaded remove change:visible',
+                'imagesLoaded remove reset change:visible',
                 this.render
             );
             this.listenTo(this.images, 'imagesLoaded', this.setPreviewSize);
@@ -36,7 +36,7 @@ define([
             this.previewSize.width = firstImage.width;
             this.previewSize.height = firstImage.height;
 
-            // Setting canvas.width sets the *logical* canvas width, not it's
+            // Setting <canvas>.width sets the *logical* canvas width, not it's
             // visual width, which is set with canvas.style.width.
             this.elPreviewImage.width = this.previewSize.width;
             this.elPreviewImage.height = this.previewSize.height;
@@ -49,13 +49,13 @@ define([
                 width: scroller.clientWidth,
                 height: scroller.clientHeight
             };
-            // The -2 is to account for the image's 1px borders
+            // The +2 is to account for the canvas's 1px border
             var computedHeight = zoomToFit ?
-                this.elPreviewImage.getBoundingClientRect().height + 2 :
-                this.previewSize.height;
+                this.elPreviewImage.offsetHeight :
+                this.previewSize.height + 2;
             var computedWidth = zoomToFit ?
-                this.elPreviewImage.getBoundingClientRect().width + 2 :
-                this.previewSize.width;
+                this.elPreviewImage.offsetWidth :
+                this.previewSize.width + 2;
 
             if (zoomToFit || this.previewSize.width < paneSize.width) {
                 this.elPreviewImage.style.marginLeft =

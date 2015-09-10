@@ -8,6 +8,7 @@ define([
         events: {
             'click button.choose': 'showFilePicker',
             'change input.choose': 'filesChosen',
+            'click button.remove-all': 'removeAll',
             'dragenter .image-stack.pane': 'onDragEnter',
             'dragover .drop-overlay': 'onDragOver',
             'dragleave .drop-overlay': 'onDragLeave',
@@ -20,9 +21,12 @@ define([
             this.images = options.images;
         },
 
-        // Custom methods
         showFilePicker: function () {
             this.elFileInput.click();
+        },
+
+        removeAll: function () {
+            this.images.reset();
         },
 
         onDragEnter: function (evt) {

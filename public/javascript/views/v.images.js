@@ -16,7 +16,7 @@ define([
         },
         initialize: function (options) {
             this.images = options.images;
-            this.listenTo(this.images, 'add remove', this.render);
+            this.listenTo(this.images, 'add remove reset', this.render);
             this.listenTo(this.images, 'change:thumbnailURL', this.updateThumb);
         },
         render: function () {

@@ -6,15 +6,19 @@ html
     link(rel="stylesheet", href="assets/css/main.css")
   body
     header
-      button.choose
-        | + Add images&hellip;
-        input.choose(type="file", multiple)
+      .stack.button-group
+        button.choose
+          | + Add images&hellip;
+          input.choose(type="file", multiple)
+        button.remove-all
+          | Remove all
 
       h1 Stack Merge
 
-      button.save
-        <i class="icon"></i>
-        | Save image
+      .preview.button-group
+        button.save
+          <i class="icon"></i>
+          | Save image
 
     .image-stack.pane.drop-target
       p.hint You can drag and drop images here to load them.
@@ -61,7 +65,7 @@ html
         a(href="https://luminous-landscape.com/making-people-and-other-things-go-away/") this Luminous Landscape article
 
     if (process.env.NODE_ENV === 'production')
-      script(data-main="main", src="/assets/javascript/main.built.20150910b.js")
+      script(data-main="main", src="/assets/javascript/main.built.20150910c.js")
     else
       script(data-main="main", src="assets/javascript/lib/require.js")
       script.
