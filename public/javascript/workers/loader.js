@@ -1,12 +1,9 @@
 /*global postMessage, onmessage:true */
-// Loads the File in the background then passes back an object URL to it.
 onmessage = function (message) {
     var file = message.data;
-    var reader = new FileReader();
-    reader.onloadend = function () {
-        var url = URL.createObjectURL(file);
-        postMessage(url);
-    };
-
+    // *Sync method only available in Workers.
+    var reader = new FileReaderSync();
+    var url = URL.createObjectURL(file);
     reader.readAsArrayBuffer(file);
+    postMessage(url);
 };
