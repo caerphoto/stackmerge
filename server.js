@@ -7,7 +7,8 @@ var builtJSPath;
 
 // Detect what the current built JS file is called.
 if (process.env.NODE_ENV === 'production') {
-    builtJSPath = glob.sync('./assets/javascript/application-*')[0];
+    builtJSPath = glob.sync('./public/javascript/application-*')[0];
+    builtJSPath = builtJSPath.replace('public', 'assets');
 }
 
 app.set('view engine', 'jade');
