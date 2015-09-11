@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'OpenSansRegular';
+    src: url('/assets/media/opensans-regular-webfont.woff2') format('woff2'),
+         url('/assets/media/opensans-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* Mini-reset */
 html, body,
 h1, h2, h3, h4,
@@ -25,7 +33,7 @@ html {
 }
 
 body {
-    font-family: "Open Sans", "Lucida Grande", "Segoe UI", "Ubuntu", "Roboto", sans-serif;
+    font-family: "OpenSansRegular", "Open Sans", "Lucida Grande", "Segoe UI", "Ubuntu", "Roboto", sans-serif;
     overflow: hidden;
 }
 
@@ -137,20 +145,9 @@ label[for] {
 }
 
 .controls label {
-    color: #fff8e0;
-    text-shadow: 1px 1px 1px rgba(255, 187, 0, 0.3);
-}
-
-.controls label::after {
-    content: " ";
-    position: absolute;
-    width: 100%;
-    height: 0;
-    left: 0;
-    top: 50%;
-    box-shadow: 0 0 1em 3px #000;
-    z-index: -1;
-    opacity: 0.8;
+    background-color: rgba(255, 187, 0, 0.3);
+    padding: 0.1em 0.5em;
+    border-radius: 4px;
 }
 
 .controls label:hover::after {
@@ -185,6 +182,13 @@ button:active {
     margin-top: 1px;
     margin-bottom: 0;
     box-shadow: none;
+}
+
+.controls button {
+    margin-right: 1.5em;
+}
+.controls input {
+    margin-top: 0.3em;
 }
 
 header .button-group {
@@ -435,14 +439,6 @@ ol.image-stack .remove {
     padding: 1em;
     opacity: 0.3;
     z-index: 1;
-}
-
-.controls button {
-    margin-right: 1.5em;
-}
-.controls input {
-    margin-top: 0.3em;
-    margin-right: 0.5em;
 }
 
 .preview.pane.has-images .controls {
