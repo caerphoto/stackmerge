@@ -101,6 +101,9 @@ input[type="checkbox"] {
     border-radius: 4px;
     position: relative;
     vertical-align: -0.2em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 input[type="checkbox"]:checked {

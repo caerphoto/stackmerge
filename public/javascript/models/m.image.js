@@ -58,6 +58,7 @@ define([
             image.onload = function () {
                 this.generateImageData(image);
                 URL.revokeObjectURL(message.data);
+                this.loader.terminate();
             }.bind(this);
             image.src = message.data;
         }

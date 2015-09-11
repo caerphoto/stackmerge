@@ -19,8 +19,13 @@
   "author": "Andy Farrell",
   "license": "ISC",
   "dependencies": {
+    "glob": "~5.0",
     "morgan": "^1.6",
     "express": "^4.13.3",
     "jade": "^1.11.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4",
+    "grunt-contrib-requirejs": "~0.4"
   }
 }

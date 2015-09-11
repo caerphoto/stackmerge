@@ -42,7 +42,7 @@ html
       .preview-scroller
         canvas.preview-image
 
-    script#template-stack-item(type='text/mustache').
+    script#template-stack-item(type="text/mustache").
       {{# images }}
       <li id="thumbnail-{{id}}" class="{{#visible}}using {{/visible}} {{^thumbnailURL}}loading {{/thumbnailURL}}">
         <input type="checkbox" data-id="{{ id }}" {{# visible }}checked{{/ visible }} class="toggle">
@@ -65,7 +65,7 @@ html
         a(href="https://luminous-landscape.com/making-people-and-other-things-go-away/") this Luminous Landscape article
 
     if (process.env.NODE_ENV === 'production')
-      script(data-main="main", src="/assets/javascript/main.built.20150910c.js")
+      script(data-main="main", src="#{ builtJSPath }")
     else
       script(data-main="main", src="assets/javascript/lib/require.js")
       script.
@@ -74,7 +74,12 @@ html
           paths: {
             backbone: 'lib/backbone-min',
             underscore: 'lib/underscore-min',
-            jquery: 'lib/jquery-2.1.4.min',
+            jquery: 'lib/zepto-1.1.6.min',
             mustache: 'lib/mustache.min'
+          },
+          shim: {
+            jquery: {
+              exports: '$'
+            }
           }
         });
