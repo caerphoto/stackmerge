@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'OpenSansRegular';
+    src: url('/assets/media/opensans-regular-webfont.woff2') format('woff2'),
+         url('/assets/media/opensans-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* Mini-reset */
 html, body,
 h1, h2, h3, h4,
@@ -25,7 +33,7 @@ html {
 }
 
 body {
-    font-family: "Open Sans", "Lucida Grande", "Segoe UI", "Ubuntu", "Roboto", sans-serif;
+    font-family: "OpenSansRegular", "Open Sans", "Lucida Grande", "Segoe UI", "Ubuntu", "Roboto", sans-serif;
     overflow: hidden;
 }
 
@@ -80,7 +88,8 @@ input[type="text"],
 input[type="number"],
 input[type="password"] {
     border-radius: 2px;
-    display: inline-block;
+    display: block;
+    float: left;
 }
 
 input[type="text"],
@@ -99,6 +108,10 @@ input[type="checkbox"] {
     cursor: pointer;
     border-radius: 4px;
     position: relative;
+    vertical-align: -0.2em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 input[type="checkbox"]:checked {
@@ -121,6 +134,26 @@ input[type="checkbox"]:checked::after {
     content: "\2716";
 }
 
+label {
+    position: relative;
+    color: #000;
+    display: inline-block;
+}
+
+label[for] {
+    cursor: pointer;
+}
+
+.controls label {
+    background-color: rgba(255, 187, 0, 0.3);
+    padding: 0.1em 0.5em;
+    border-radius: 4px;
+}
+
+.controls label:hover::after {
+    opacity: 1;
+}
+
 .dialog {
     background-color: #eee;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
@@ -129,7 +162,7 @@ input[type="checkbox"]:checked::after {
 button {
     background-color: #ddd;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    margin-top: -1px;
+    margin-top: 0;
     margin-bottom: 1px;
     cursor: pointer;
     line-height: 1;
@@ -146,25 +179,36 @@ button:focus {
 }
 
 button:active {
-    margin-top: 0;
+    margin-top: 1px;
     margin-bottom: 0;
     box-shadow: none;
 }
 
-header button {
+.controls button {
+    margin-right: 1.5em;
+}
+.controls input {
+    margin-top: 0.3em;
+}
+
+header .button-group {
     position: absolute;
     top: 1em;
 }
 
-header button.choose {
+header .button-group.stack {
     left: 1em;
 }
 
-header input.choose {
+.button-group.stack button {
+    margin-right: 1em;
+}
+
+input[type="file"] {
     display: none;
 }
 
-header button.save {
+header .button-group.preview {
     right: 1em;
 }
 
@@ -276,25 +320,41 @@ ol.image-stack figure {
     background: none;
 }
 
-ol.image-stack figure.loading {
-    background: url('/assets/media/loading-small-white-black.gif') center no-repeat;
+ol.image-stack .loading-spinner,
+ol.image-stack img,
+.preview-image {
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
 }
 
 ol.image-stack img {
     display: block;
     max-width: 14em;
     max-height: 14em;
-    border: 1px solid #ccc;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     margin: auto;
     opacity: 0.5;
 }
 
 ol.image-stack .using img {
     opacity: 1;
+}
+
+ol.image-stack .loading img {
+    display: none;
+}
+
+ol.image-stack .loading-spinner {
+    display: none;
+}
+
+ol.image-stack .loading .loading-spinner {
+    display: block;
+    height: 64px;
+    width: 100%;
+    background: url('/assets/media/loading-small-white-black.gif') center no-repeat;
 }
 
 ol.image-stack .toggle,
@@ -325,14 +385,23 @@ ol.image-stack .remove {
     left: 0;
     bottom: 0;
     overflow: scroll;
-    z-index: 0;
 }
 
-canvas.preview {
+.preview-image {
+    display: none;
     width: auto;
     height: auto;
     margin: auto;
     background-color: #888;
+}
+
+.zoom-to-fit .preview-image {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.preview.pane.has-images .preview-image {
+    display: block;
 }
 
 .preview.pane .working-overlay {
@@ -341,19 +410,41 @@ canvas.preview {
     top: 50%;
     left: 50%;
     width: 20em;
-    height: 6em;
+    height: 8.5em;
     margin-left: -10em;
-    margin-top: -3em;
-    padding-top: 1em;
+    margin-top: -4.2em;
+    padding: 1em 1.5em;
     text-align: center;
     z-index: 1;
+}
+
+.working-overlay button {
+    display: inline-block;
+    float: none;
 }
 
 .working-overlay progress {
     display: block;
     margin: 1em auto;
+    width: auto;
 }
 
 .preview.pane.working .working-overlay {
     display: block;
+}
+
+.preview.pane .controls {
+    display: none;
+    position: relative;
+    padding: 1em;
+    opacity: 0.3;
+    z-index: 1;
+}
+
+.preview.pane.has-images .controls {
+    display: inline-block;
+}
+
+.preview.pane .controls:hover {
+    opacity: 1;
 }

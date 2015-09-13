@@ -1,7 +1,15 @@
 var express = require('express');
 var app = express();
 var morgan = require('morgan');
+var glob = require('glob');
 var server;
+var builtJSPath;
+
+// Detect what the current built JS file is called.
+if (process.env.NODE_ENV === 'production') {
+    builtJSPath = glob.sync('./public/javascript/application-*')[0];
+    builtJSPath = builtJSPath.replace('public', 'assets');
+}
 
 app.set('view engine', 'jade');
 
@@ -12,7 +20,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.get('/', function (req, res) {
-    res.render('index');
+    res.render('index', { builtJSPath: builtJSPath });
 });
 
 // Recommended in production to let Apache/nginx handle serving assets.

@@ -4,17 +4,22 @@ html
     title Stack Merge
     link(rel="shortcut icon", type="image/png", href="/assets/media/favicon.png")
     link(rel="stylesheet", href="assets/css/main.css")
+
   body
     header
-      button.choose
-        | + Choose images
-        input.choose(type="file", multiple)
+      .stack.button-group
+        button.choose
+          | + Add images&hellip;
+          input.choose(type="file", multiple)
+        button.remove-all
+          | Remove all
 
       h1 Stack Merge
 
-      button.save
-        <i class="icon"></i>
-        | Save image
+      .preview.button-group
+        button.save
+          <i class="icon"></i>
+          | Save image
 
     .image-stack.pane.drop-target
       p.hint You can drag and drop images here to load them.
@@ -28,18 +33,24 @@ html
       .working-overlay.dialog
         p Working&hellip;
         progress(min="0", max="100", value="0")
-      .preview-scroller
-        canvas.preview
+        button.cancel Cancel
 
-    script#template-stack-item(type='text/mustache').
+      .controls
+        button.refresh Refresh
+        input#zoom-to-fit(type="checkbox")
+        label(for="zoom-to-fit") Zoom to fit
+
+      .preview-scroller
+        canvas.preview-image
+
+    script#template-stack-item(type="text/mustache").
       {{# images }}
-      <li id="thumb-{{id}}" {{#visible}}class="using"{{/visible}}>
+      <li id="thumbnail-{{id}}" class="{{#visible}}using {{/visible}} {{^thumbnailURL}}loading {{/thumbnailURL}}">
         <input type="checkbox" data-id="{{ id }}" {{# visible }}checked{{/ visible }} class="toggle">
         <button class="remove" data-id="{{ id }}">Remove</button>
-        <figure {{^canvas}}class="loading"{{/canvas}}>
-          {{# image }}
-          <img src="{{ image.src }}">
-          {{/ image }}
+        <figure>
+          <div class="loading-spinner"></div>
+          <img src="{{ thumbnailURL }}">
           <figcaption class="thumbnail-name">{{ name }}</figcaption>
         </figure>
       </li>
@@ -55,7 +66,7 @@ html
         a(href="https://luminous-landscape.com/making-people-and-other-things-go-away/") this Luminous Landscape article
 
     if (process.env.NODE_ENV === 'production')
-      script(data-main="main", src="/assets/javascript/main.built.js")
+      script(data-main="main", src="#{ builtJSPath }")
     else
       script(data-main="main", src="assets/javascript/lib/require.js")
       script.
@@ -64,7 +75,12 @@ html
           paths: {
             backbone: 'lib/backbone-min',
             underscore: 'lib/underscore-min',
-            jquery: 'lib/jquery-2.1.4.min',
+            jquery: 'lib/zepto-1.1.6.min',
             mustache: 'lib/mustache.min'
+          },
+          shim: {
+            jquery: {
+              exports: '$'
+            }
           }
         });

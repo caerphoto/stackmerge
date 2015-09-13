@@ -8,71 +8,83 @@ define([
     var PreviewView = Backbone.View.extend({
         el: '.preview.pane',
         events: {
-            'click .refresh': 'render'
+            'click .refresh': 'render',
+            'click .cancel': 'cancelProcessing',
+            'click #zoom-to-fit': 'toggleZoom'
+        },
+        previewSize: {
+            width: 0,
+            height: 0
         },
         initialize: function (options) {
             this.images = options.images;
-            this.canvas = this.$('canvas').get(0);
+            this.elPreviewImage = this.$('.preview-image').get(0);
             this.listenTo(
                 this.images,
-                'imagesLoaded remove change:visible',
+                'imagesLoaded remove reset change:visible',
                 this.render
             );
-            this.listenTo(this.images, 'imagesLoaded', this.setCanvasSize);
+            this.listenTo(this.images, 'imagesLoaded', this.setPreviewSize);
             this.progressBar = this.$('.working-overlay progress').get(0);
             this.listenTo(this.images, 'progress', this.updateProgress);
 
-            window.addEventListener('resize', _.debounce(this.recenterCanvas, 60).bind(this));
+            window.addEventListener('resize', _.debounce(this.recenterPreview, 60).bind(this));
         },
-        setCanvasSize: function () {
-            var firstImage = this.images.getVisible()[0].get('image');
+        setPreviewSize: function () {
+            var firstImage = this.images.getVisible()[0].get('imageData');
 
-            // Setting canvas.width sets the *logical* canvas width, not it's
+            this.previewSize.width = firstImage.width;
+            this.previewSize.height = firstImage.height;
+
+            // Setting <canvas>.width sets the *logical* canvas width, not it's
             // visual width, which is set with canvas.style.width.
-            this.canvas.width = firstImage.naturalWidth;
-            this.canvas.height = firstImage.naturalHeight;
+            this.elPreviewImage.width = this.previewSize.width;
+            this.elPreviewImage.height = this.previewSize.height;
 
-            this.recenterCanvas();
+            this.recenterPreview();
         },
-        recenterCanvas: function () {
+        recenterPreview: function (zoomToFit) {
             var scroller = this.el.querySelector('.preview-scroller');
             var paneSize = {
                 width: scroller.clientWidth,
                 height: scroller.clientHeight
             };
+            // The +2 is to account for the canvas's 1px border
+            var computedHeight = zoomToFit ?
+                this.elPreviewImage.offsetHeight :
+                this.previewSize.height + 2;
+            var computedWidth = zoomToFit ?
+                this.elPreviewImage.offsetWidth :
+                this.previewSize.width + 2;
 
-            if (this.canvas.width < paneSize.width) {
-                this.canvas.style.marginLeft =
-                    ((paneSize.width - this.canvas.width) / 2) + 'px';
+            if (zoomToFit || this.previewSize.width < paneSize.width) {
+                this.elPreviewImage.style.marginLeft =
+                    ((paneSize.width - computedWidth) / 2) + 'px';
             } else {
-                this.canvas.style.marginLeft = 0;
+                this.elPreviewImage.style.marginLeft = 0;
             }
 
-            if (this.canvas.height < paneSize.height) {
-                this.canvas.style.marginTop =
-                    ((paneSize.height - this.canvas.height) / 2) + 'px';
+            if (zoomToFit || this.previewSize.height < paneSize.height) {
+                this.elPreviewImage.style.marginTop =
+                    ((paneSize.height - computedHeight) / 2) + 'px';
             } else {
-                this.canvas.style.marginTop = 0;
+                this.elPreviewImage.style.marginTop = 0;
             }
 
 
         },
         render: function () {
-            var outputCtx = this.canvas.getContext('2d');
+            var outputCtx = this.elPreviewImage.getContext('2d');
             var visibleImages;
             var firstImage;
 
-            if (this.images.length === 0) {
-                return this;
-            }
-
             visibleImages = this.images.getVisible();
-
-            if (visibleImages.length === 0) {
+            this.$el.toggleClass('has-images', visibleImages.length > 0);
+            if (this.images.length === 0 && visibleImages.length === 0) {
                 return this;
             }
 
-            firstImage = visibleImages[0].get('image');
+            firstImage = visibleImages[0].get('imageData');
 
             if (!firstImage) {
                 return this;
@@ -81,17 +93,31 @@ define([
             this.$el.addClass('working');
             this.progressBar.value = 0;
 
-            console.time('processing');
-            this.images.getCombinedImageData(function (data) {
-                console.timeEnd('processing');
+            console.time('generate combined image');
+            this.images.generateCombinedImageData(function (data) {
+                console.timeEnd('generate combined image');
                 this.$el.removeClass('working');
                 outputCtx.putImageData(data, 0, 0);
             }.bind(this));
 
             return this;
         },
-        updateProgress: function (progress) {
+        updateProgress: function (reset) {
+            var progress;
+            if (reset) {
+                progress = 0;
+            } else {
+                progress = parseInt(this.progressBar.value, 10) + 1;
+            }
             this.progressBar.value = progress;
+        },
+        cancelProcessing: function () {
+            this.$el.removeClass('working');
+            this.images.terminateWorkers();
+        },
+        toggleZoom: function (evt) {
+            this.$el.toggleClass('zoom-to-fit', evt.target.checked);
+            this.recenterPreview(evt.target.checked);
         }
     });
 
