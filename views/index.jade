@@ -10,12 +10,18 @@ html
       h1 Stack Merge
 
     .image-stack.pane.drop-target
-      .stack.button-group
+      .stack.controls-group
         button.choose
           | + Add images&hellip;
           input.choose(type="file", multiple)
+
         button.remove-all
           | Remove all
+
+        label(for="blending-mode") Blending mode
+        select#blending-mode
+          option(value="edges") Edges
+          option(value="median", selected) Median
 
       p.hint You can drag and drop images here to load them.
 
@@ -30,7 +36,7 @@ html
         progress(min="0", max="100", value="0")
         button.cancel Cancel
 
-      .controls
+      .controls-group
         button.refresh Refresh
         input#zoom-to-fit(type="checkbox")
         label(for="zoom-to-fit") Zoom to fit

@@ -74,7 +74,7 @@ function mergeImages() {
 }
 
 onmessage = function (message) {
-    if (message.data === 'start') {
+    if (message.data === 'start fast' || message.data === 'start nice') {
         mergeImages();
     } else if (message.data.byteLength) {
         allPixels.push(new Uint8ClampedArray(message.data));

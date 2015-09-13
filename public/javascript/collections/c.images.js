@@ -10,11 +10,15 @@ define([
     var ImagesCollection = Backbone.Collection.extend({
         model: ImageModel,
         imagesToLoad: 0,
-        workerPath: '/assets/javascript/workers/median_processor.js',
-        initialize: function () {
+        workerPaths: {
+            edges: '/assets/javascript/workers/edges_processor.js',
+            median: '/assets/javascript/workers/median_processor.js'
+        },
+        initialize: function (attrs, options) {
+            this.preview = options.previewModel;
+
             this.on('change:imageData', this.imageDataReady);
             this.working = false;
-            this.cachedBuffer = null;
         },
         imageDataReady: function (model, imageData) {
             if (imageData) {
@@ -22,6 +26,10 @@ define([
             }
 
             if (this.imagesToLoad === 0) {
+                this.preview.set('size', {
+                    width: imageData.width,
+                    height: imageData.height
+                });
                 setTimeout(function () {
                     console.timeEnd('load images');
                     this.trigger('imagesLoaded');
@@ -78,15 +86,17 @@ define([
             if (data && data.byteLength) {
                 this.processedBuffers[id] = data;
             } else {
-                this.trigger('progress');
+                this.preview.set('progress', this.preview.get('progress') + 1);
             }
             this.callbackIfComplete(callback);
         },
 
-        generateCombinedImageData: function (done) {
+        generateCombinedImageData: function (highQuality, done) {
             var allData = _.map(this.getVisible(true), function (model) {
                 return model.get('imageData');
             });
+            var blendingMode = this.preview.get('blendingMode');
+
             if (!_.every(this.getVisible(), function (model) {
                 return model.get('imageData') !== null;
             })) {
@@ -101,8 +111,8 @@ define([
                 this.terminateWorkers();
             }
 
-            this.worker1 = new Worker(this.workerPath);
-            this.worker2 = new Worker(this.workerPath);
+            this.worker1 = new Worker(this.workerPaths[blendingMode]);
+            this.worker2 = new Worker(this.workerPaths[blendingMode]);
 
             this.worker1.addEventListener('message', function (message) {
                 this.onWorkerMessage(message.data, 0, done);
@@ -113,7 +123,7 @@ define([
 
             this.working = true;
             this.processedBuffers = [false, false];
-            this.trigger('progress', true);
+            this.preview.set('progress', 0);
             this.imageSize = {
                 width: allData[0].width,
                 height: allData[0].height
@@ -129,8 +139,16 @@ define([
             }, this);
             console.timeEnd('copy data to worker');
 
-            this.worker1.postMessage('start');
-            this.worker2.postMessage('start');
+            this.worker1.postMessage(allData[0].width);
+            this.worker2.postMessage(allData[0].width);
+
+            if (highQuality) {
+                this.worker1.postMessage('start nice');
+                this.worker2.postMessage('start nice');
+            } else {
+                this.worker1.postMessage('start fast');
+                this.worker2.postMessage('start fast');
+            }
         },
         terminateWorkers: function () {
             if (this.worker1) {

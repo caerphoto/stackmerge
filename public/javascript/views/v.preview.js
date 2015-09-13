@@ -18,15 +18,19 @@ define([
         },
         initialize: function (options) {
             this.images = options.images;
+            this.model = options.previewModel;
+
             this.elPreviewImage = this.$('.preview-image').get(0);
             this.listenTo(
                 this.images,
                 'imagesLoaded remove reset change:visible',
                 this.render
             );
-            this.listenTo(this.images, 'imagesLoaded', this.setPreviewSize);
+            this.listenTo(this.model, 'change:blendingMode', this.render);
+            this.listenTo(this.model, 'change:size', this.setPreviewSize);
+            this.listenTo(this.model, 'change:progress', this.updateProgress);
+
             this.progressBar = this.$('.working-overlay progress').get(0);
-            this.listenTo(this.images, 'progress', this.updateProgress);
 
             window.addEventListener('resize', _.debounce(this.recenterPreview, 60).bind(this));
         },
@@ -70,9 +74,8 @@ define([
             } else {
                 this.elPreviewImage.style.marginTop = 0;
             }
-
-
         },
+
         render: function () {
             var outputCtx = this.elPreviewImage.getContext('2d');
             var visibleImages;
@@ -94,7 +97,7 @@ define([
             this.progressBar.value = 0;
 
             console.time('generate combined image');
-            this.images.generateCombinedImageData(function (data) {
+            this.images.generateCombinedImageData(false, function (data) {
                 console.timeEnd('generate combined image');
                 this.$el.removeClass('working');
                 outputCtx.putImageData(data, 0, 0);
@@ -102,13 +105,7 @@ define([
 
             return this;
         },
-        updateProgress: function (reset) {
-            var progress;
-            if (reset) {
-                progress = 0;
-            } else {
-                progress = parseInt(this.progressBar.value, 10) + 1;
-            }
+        updateProgress: function (model, progress) {
             this.progressBar.value = progress;
         },
         cancelProcessing: function () {
