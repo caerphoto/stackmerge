@@ -184,7 +184,7 @@ button:active {
     padding: 1rem 0.5rem;
     overflow: hidden;
     font-size: 0.8rem;
-    height: 5.5rem;
+    height: 3.75rem;
     border-bottom: 1px solid #eee;
 }
 
@@ -287,7 +287,7 @@ ol.image-stack {
     overflow-y: auto;
     overflow-x: hidden;
     position: absolute;
-    top: 5.5rem;
+    top: 3.75rem;
     left: 0;
     width: 100%;
     bottom: 0;

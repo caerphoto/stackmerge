@@ -18,10 +18,11 @@ html
         button.remove-all
           | Remove all
 
-        label(for="blending-mode") Blending mode
-        select#blending-mode
-          option(value="edges") Edges
-          option(value="median", selected) Median
+        div(style="display: none")
+          label(for="blending-mode") Blending mode
+          select#blending-mode
+            option(value="edges") Edges
+            option(value="median", selected) Median
 
       p.hint You can drag and drop images here to load them.
 

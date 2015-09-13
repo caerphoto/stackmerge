@@ -35,10 +35,10 @@ define([
             window.addEventListener('resize', _.debounce(this.recenterPreview, 60).bind(this));
         },
         setPreviewSize: function () {
-            var firstImage = this.images.getVisible()[0].get('imageData');
+            var size = this.model.get('size');
 
-            this.previewSize.width = firstImage.width;
-            this.previewSize.height = firstImage.height;
+            this.previewSize.width = size.width;
+            this.previewSize.height = size.height;
 
             // Setting <canvas>.width sets the *logical* canvas width, not it's
             // visual width, which is set with canvas.style.width.
@@ -97,7 +97,7 @@ define([
             this.progressBar.value = 0;
 
             console.time('generate combined image');
-            this.images.generateCombinedImageData(false, function (data) {
+            this.images.generateCombinedImageData(true, function (data) {
                 console.timeEnd('generate combined image');
                 this.$el.removeClass('working');
                 outputCtx.putImageData(data, 0, 0);
