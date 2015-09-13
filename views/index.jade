@@ -7,6 +7,9 @@ html
 
   body
     header
+      h1 Stack Merge
+
+    .image-stack.pane.drop-target
       .stack.button-group
         button.choose
           | + Add images&hellip;
@@ -14,14 +17,6 @@ html
         button.remove-all
           | Remove all
 
-      h1 Stack Merge
-
-      .preview.button-group
-        button.save
-          <i class="icon"></i>
-          | Save image
-
-    .image-stack.pane.drop-target
       p.hint You can drag and drop images here to load them.
 
       .drop-overlay
@@ -39,6 +34,9 @@ html
         button.refresh Refresh
         input#zoom-to-fit(type="checkbox")
         label(for="zoom-to-fit") Zoom to fit
+        button.save
+          <i class="icon"></i>
+          | Save image
 
       .preview-scroller
         canvas.preview-image

@@ -88,8 +88,8 @@ input[type="text"],
 input[type="number"],
 input[type="password"] {
     border-radius: 2px;
-    display: block;
-    float: left;
+    display: inline-block;
+    /*float: left;*/
 }
 
 input[type="text"],
@@ -137,7 +137,6 @@ input[type="checkbox"]:checked::after {
 label {
     position: relative;
     color: #000;
-    display: inline-block;
 }
 
 label[for] {
@@ -184,6 +183,7 @@ button:active {
     box-shadow: none;
 }
 
+.controls label,
 .controls button {
     margin-right: 1.5em;
 }
@@ -191,17 +191,26 @@ button:active {
     margin-top: 0.3em;
 }
 
-header .button-group {
+.button-group {
     position: absolute;
     top: 1em;
 }
 
-header .button-group.stack {
-    left: 1em;
+.image-stack .button-group {
+    position: static;
+    padding: 1rem 0.5rem;
+    overflow: hidden;
+    font-size: 0.8rem;
+    height: 3.75rem;
+    border-bottom: 1px solid #eee;
 }
 
-.button-group.stack button {
-    margin-right: 1em;
+.image-stack .button-group button {
+    width: 7.75rem;
+}
+
+.image-stack .button-group button + button {
+    margin-left: 0.5rem;
 }
 
 input[type="file"] {
@@ -294,7 +303,7 @@ ol.image-stack {
     overflow-y: auto;
     overflow-x: hidden;
     position: absolute;
-    top: 0;
+    top: 3.75em;
     left: 0;
     width: 100%;
     bottom: 0;
