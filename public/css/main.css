@@ -43,7 +43,7 @@ header {
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
     padding: 0;
-    height: 4rem;
+    height: 3.3rem;
     border-bottom: 1px solid #b70;
     position: relative;
     z-index: 3;
@@ -78,8 +78,14 @@ a {
 
 h1 {
     text-align: center;
-    font-size: 2rem;
-    line-height: 2;
+    font-size: 1.8rem;
+    line-height: 1.8;
+}
+
+header h1::before,
+header h1::after {
+    content: "\2261"; /* 'identical to' */
+    padding: 0 0.5em;
 }
 
 .dialog,
@@ -231,7 +237,7 @@ button.save .icon {
 .pane {
     background-color: #fff;
     position: absolute;
-    top: 4em;
+    top: 3.3em;
     bottom: 1.6em;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.2);
 }
