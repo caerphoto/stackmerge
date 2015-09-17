@@ -31,6 +31,8 @@ define([
             this.listenTo(this.model, 'change:progress', this.updateProgress);
 
             this.progressBar = this.$('.working-overlay progress').get(0);
+            this.elCancel = this.$('button.cancel').get(0);
+            this.$timing = this.$el.parent().find('.timing span');
 
             window.addEventListener('resize', _.debounce(this.recenterPreview, 60).bind(this));
         },
@@ -80,6 +82,8 @@ define([
             var outputCtx = this.elPreviewImage.getContext('2d');
             var visibleImages;
             var firstImage;
+            var timingStart;
+            var performance = window.performance;
 
             visibleImages = this.images.getVisible();
             this.$el.toggleClass('has-images', visibleImages.length > 0);
@@ -94,13 +98,16 @@ define([
             }
 
             this.$el.addClass('working');
+            this.elCancel.focus();
             this.progressBar.value = 0;
 
-            console.time('generate combined image');
+            timingStart = performance && performance.now() || Date.now();
             this.images.generateCombinedImageData(true, function (data) {
-                console.timeEnd('generate combined image');
-                this.$el.removeClass('working');
+                var timingEnd = performance && performance.now() || Date.now();
+                var timing = ((timingEnd - timingStart) / 1000).toFixed(2);
                 outputCtx.putImageData(data, 0, 0);
+                this.$el.removeClass('working');
+                this.$timing.text(timing);
             }.bind(this));
 
             return this;

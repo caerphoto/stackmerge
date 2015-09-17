@@ -64,6 +64,14 @@ footer {
     height: 1.6rem;
 }
 
+footer p:first-child {
+    float: left;
+}
+
+footer p.timing {
+    text-align: right;
+}
+
 a {
     color: #000;
 }
@@ -184,7 +192,7 @@ button:active {
     padding: 1rem 0.5rem;
     overflow: hidden;
     font-size: 0.8rem;
-    height: 3.75rem;
+    height: 5.5rem;
     border-bottom: 1px solid #eee;
 }
 
@@ -287,7 +295,7 @@ ol.image-stack {
     overflow-y: auto;
     overflow-x: hidden;
     position: absolute;
-    top: 3.75rem;
+    top: 5.5rem;
     left: 0;
     width: 100%;
     bottom: 0;

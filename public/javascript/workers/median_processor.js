@@ -33,7 +33,8 @@ function quickSort(array, left, right) {
 }
 
 function mergeImages() {
-    var combined = new Uint8ClampedArray(allPixels[0].length);
+    var combined = new Uint8Array(allPixels[0].length);
+    var dataSize = combined.length;
 
     var floor = Math.floor; // Slight optimisation - avoids property lookup
 
@@ -41,21 +42,19 @@ function mergeImages() {
 
     var imageIndex;
     var numImages = allPixels.length;
-    var stackPixels = new Uint8ClampedArray(numImages);
+    var stackPixels = new Uint8Array(numImages);
     var medianIndex = floor(numImages / 2);
 
     // By 50 because each instance of this worker only handles half the image
     // data.
-    var onePercent = floor(combined.length / 50);
+    var onePercent = floor(dataSize / 50);
 
-    b = combined.length;
-    while (b--) {
+    for (b = 0; b !== dataSize; b += 1) {
         if ((b + 1) % 4 === 0) {
             // Alpha channel is always 255
             combined[b] = 255;
         } else {
-            imageIndex = numImages;
-            while (imageIndex--) {
+            for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
                 stackPixels[imageIndex] = allPixels[imageIndex][b];
             }
 
@@ -77,6 +76,6 @@ onmessage = function (message) {
     if (message.data === 'start fast' || message.data === 'start nice') {
         mergeImages();
     } else if (message.data.byteLength) {
-        allPixels.push(new Uint8ClampedArray(message.data));
+        allPixels.push(new Uint8Array(message.data));
     }
 };

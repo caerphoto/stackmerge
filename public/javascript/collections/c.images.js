@@ -31,7 +31,6 @@ define([
                     height: imageData.height
                 });
                 setTimeout(function () {
-                    console.timeEnd('load images');
                     this.trigger('imagesLoaded');
                 }.bind(this), 50);
             }
@@ -43,7 +42,6 @@ define([
         addFromFiles: function (files) {
             this.imagesToLoad += files.length;
 
-            console.time('load images');
             _.forEach(files, function (file) {
                 this.push({
                     name: file.name,
@@ -129,7 +127,6 @@ define([
                 height: allData[0].height
             };
 
-            console.time('copy data to worker');
             allData.forEach(function (imageData) {
                 var len = imageData.data.buffer.byteLength;
                 var buffer1 = imageData.data.buffer.slice(0, len / 2);
@@ -137,7 +134,6 @@ define([
                 this.worker1.postMessage(buffer1, [buffer1]);
                 this.worker2.postMessage(buffer2, [buffer2]);
             }, this);
-            console.timeEnd('copy data to worker');
 
             this.worker1.postMessage(allData[0].width);
             this.worker2.postMessage(allData[0].width);

@@ -32,6 +32,7 @@ app.use(function (req, res) {
     res.status(400).send();
 });
 
+// Why 8377? Because S is decimal 83 in ASCII, and M is 77.
 server = app.listen(8377, '127.0.0.1', function () {
     var host = server.address().address;
     var port = server.address().port;

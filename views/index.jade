@@ -18,7 +18,7 @@ html
         button.remove-all
           | Remove all
 
-        div(style="display: none")
+        div
           label(for="blending-mode") Blending mode
           select#blending-mode
             option(value="edges") Edges
@@ -48,6 +48,20 @@ html
       .preview-scroller
         canvas.preview-image
 
+    footer
+      p
+        | By 
+        a(href="http://andyf.me") Andy Farrell
+        |  &middot; source available 
+        a(href="https://github.com/caerphoto/stackmerge") on GitHub
+        |  &middot; inspired by 
+        a(href="https://luminous-landscape.com/making-people-and-other-things-go-away/") this Luminous Landscape article
+      p.timing
+        | Processed images in 
+        span ?
+        |  seconds
+
+
     script#template-stack-item(type="text/mustache").
       {{# images }}
       <li id="thumbnail-{{id}}" class="{{#visible}}using {{/visible}} {{^thumbnailURL}}loading {{/thumbnailURL}}">
@@ -60,15 +74,6 @@ html
         </figure>
       </li>
       {{/ images }}
-
-    footer
-      p
-        | By 
-        a(href="http://andyf.me") Andy Farrell
-        |  &middot; source available 
-        a(href="https://github.com/caerphoto/stackmerge") on GitHub
-        |  &middot; inspired by 
-        a(href="https://luminous-landscape.com/making-people-and-other-things-go-away/") this Luminous Landscape article
 
     if (process.env.NODE_ENV === 'production')
       script(data-main="main", src="#{ builtJSPath }")
