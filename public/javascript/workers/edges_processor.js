@@ -64,7 +64,6 @@ function mergeImages(lowQuality) {
 
     var blurredImages = [];
     var focusMasks = [];
-    var blurredFocusMasks = [];
 
     var b;
     var b4;
@@ -140,7 +139,6 @@ function mergeImages(lowQuality) {
         for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
             blurredImages[imageIndex] = new Uint8Array(dataSize);
             focusMasks[imageIndex] = new Uint8Array(dataSize);
-            blurredFocusMasks[imageIndex] = new Uint8Array(dataSize);
         }
 
         createBlurredSource();
@@ -160,6 +158,8 @@ function mergeImages(lowQuality) {
                 postMessage(null);
             }
         }
+
+        blurredImages = null;
 
         // Third pass finds the pixel in a gaussian blurred version of each
         // focus mask image with the highest value. The index of this image is

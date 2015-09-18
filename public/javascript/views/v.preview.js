@@ -20,7 +20,6 @@ define([
             this.images = options.images;
             this.model = options.previewModel;
 
-            this.elPreviewImage = this.$('.preview-image').get(0);
             this.listenTo(
                 this.images,
                 'imagesLoaded remove reset change:visible',
@@ -30,9 +29,11 @@ define([
             this.listenTo(this.model, 'change:size', this.setPreviewSize);
             this.listenTo(this.model, 'change:progress', this.updateProgress);
 
-            this.progressBar = this.$('.working-overlay progress').get(0);
+            this.elPreviewImage = this.$('.preview-image').get(0);
+            this.elProgressBar = this.$('.working-overlay progress').get(0);
             this.elCancel = this.$('button.cancel').get(0);
             this.$timing = this.$el.parent().find('.timing span');
+            this.$remaining = this.$('.working-overlay .remaining');
 
             window.addEventListener('resize', _.debounce(this.recenterPreview, 60).bind(this));
         },
@@ -78,6 +79,28 @@ define([
             }
         },
 
+        formatSeconds: function (seconds) {
+            return (seconds < 10 ?
+                seconds.toPrecision(2) :
+                Math.round(seconds)) + ' seconds';
+        },
+
+        formatTiming: function (seconds) {
+            var minutes;
+            var minuteWord = ' minute ';
+
+            if (seconds < 70) {
+                return this.formatSeconds(seconds);
+            }
+
+            minutes = Math.floor(seconds / 60);
+
+            if (minutes !== 1) {
+                minuteWord = ' minutes ';
+            }
+            return minutes + minuteWord + this.formatSeconds(seconds % 60);
+        },
+
         render: function () {
             var outputCtx = this.elPreviewImage.getContext('2d');
             var visibleImages;
@@ -100,22 +123,25 @@ define([
 
             this.$el.addClass('working');
             this.elCancel.focus();
-            this.progressBar.value = 0;
+            this.elProgressBar.value = 0;
 
             timingStart = performance && performance.now() || Date.now();
+            this.model.startedAt = Date.now();
             this.images.generateCombinedImageData(highQuality, function (data) {
                 var timingEnd = performance && performance.now() || Date.now();
-                var timing = ((timingEnd - timingStart) / 1000).toPrecision(3);
+                var timing = ((timingEnd - timingStart) / 1000);
                 outputCtx.putImageData(data, 0, 0);
                 this.$el.removeClass('working');
-                this.$timing.text(timing);
+                this.$timing.text(this.formatTiming(timing));
                 this.$timing.parent().addClass('has-time');
             }.bind(this));
 
             return this;
         },
         updateProgress: function (model, progress) {
-            this.progressBar.value = progress;
+            var remaining = model.get('timeRemaining') / 1000;
+            this.elProgressBar.value = progress;
+            this.$remaining.text(this.formatTiming(remaining));
         },
         cancelProcessing: function () {
             this.$el.removeClass('working');

@@ -421,8 +421,8 @@ ol.image-stack .remove {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 20em;
-    height: 8.5em;
+    width: 22em;
+    min-height: 8.5em;
     margin-left: -10em;
     margin-top: -4.2em;
     padding: 1em 1.5em;

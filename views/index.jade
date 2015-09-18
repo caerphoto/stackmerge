@@ -34,7 +34,9 @@ html
 
     .preview.pane
       .working-overlay.dialog
-        p Working&hellip;
+        p About 
+          span.remaining
+          |  remaining&hellip;
         progress(min="0", max="100", value="0")
         button.cancel Cancel
 
@@ -60,7 +62,6 @@ html
       p.timing
         | Merged images in 
         span ?
-        |  seconds
 
 
     script#template-stack-item(type="text/mustache").
