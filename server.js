@@ -4,6 +4,7 @@ var morgan = require('morgan');
 var glob = require('glob');
 var server;
 var builtJSPath;
+var host;
 
 // Detect what the current built JS file is called.
 if (process.env.NODE_ENV === 'production') {
@@ -33,7 +34,8 @@ app.use(function (req, res) {
 });
 
 // Why 8377? Because S is decimal 83 in ASCII, and M is 77.
-server = app.listen(8377, '127.0.0.1', function () {
+host = process.env.NODE_ENV === 'production' ? 'localhost' : '0.0.0.0';
+server = app.listen(8377, host, function () {
     var host = server.address().address;
     var port = server.address().port;
     var env = process.env.NODE_ENV || 'development';

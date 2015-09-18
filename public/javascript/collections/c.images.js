@@ -69,14 +69,22 @@ define([
         },
 
         callbackIfComplete: function (callback) {
+            var ctx;
             var buffer;
+            var imageData;
+
             if (this.processedBuffers[0] && this.processedBuffers[1]) {
-                buffer = this.concatBuffers(this.processedBuffers);
-                callback(new ImageData(
-                    new Uint8ClampedArray(buffer),
+                // MS Edge doesn't support the ImageData() constructor, so we
+                // have to create an ImageData object in a slightly roundabout
+                // way.
+                ctx = document.createElement('canvas').getContext('2d');
+                imageData = ctx.createImageData(
                     this.imageSize.width,
                     this.imageSize.height
-                ));
+                );
+                buffer = this.concatBuffers(this.processedBuffers);
+                imageData.data.set(new Uint8ClampedArray(buffer));
+                callback(imageData);
             }
         },
 
@@ -127,12 +135,18 @@ define([
                 height: allData[0].height
             };
 
-            allData.forEach(function (imageData) {
+            allData.forEach(function (imageData, index) {
                 var len = imageData.data.buffer.byteLength;
-                var buffer1 = imageData.data.buffer.slice(0, len / 2);
-                var buffer2 = imageData.data.buffer.slice(len / 2, len);
-                this.worker1.postMessage(buffer1, [buffer1]);
-                this.worker2.postMessage(buffer2, [buffer2]);
+                var buffer1, buffer2;
+                try {
+                    buffer1 = imageData.data.buffer.slice(0, len / 2);
+                    buffer2 = imageData.data.buffer.slice(len / 2, len);
+                    this.worker1.postMessage(buffer1, [buffer1]);
+                    this.worker2.postMessage(buffer2, [buffer2]);
+                } catch (e) {
+                    console.warn('Failed to create array buffers after',
+                        index - 1, 'images');
+                }
             }, this);
 
             this.worker1.postMessage(allData[0].width);
