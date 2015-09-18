@@ -26,7 +26,7 @@ define([
                 'imagesLoaded remove reset change:visible',
                 this.render
             );
-            this.listenTo(this.model, 'change:blendingMode', this.render);
+            this.listenTo(this.model, 'change:blendingMode change:highQuality', this.render);
             this.listenTo(this.model, 'change:size', this.setPreviewSize);
             this.listenTo(this.model, 'change:progress', this.updateProgress);
 
@@ -84,6 +84,7 @@ define([
             var firstImage;
             var timingStart;
             var performance = window.performance;
+            var highQuality = this.model.get('highQuality');
 
             visibleImages = this.images.getVisible();
             this.$el.toggleClass('has-images', visibleImages.length > 0);
@@ -102,12 +103,13 @@ define([
             this.progressBar.value = 0;
 
             timingStart = performance && performance.now() || Date.now();
-            this.images.generateCombinedImageData(true, function (data) {
+            this.images.generateCombinedImageData(highQuality, function (data) {
                 var timingEnd = performance && performance.now() || Date.now();
-                var timing = ((timingEnd - timingStart) / 1000).toFixed(2);
+                var timing = ((timingEnd - timingStart) / 1000).toPrecision(3);
                 outputCtx.putImageData(data, 0, 0);
                 this.$el.removeClass('working');
                 this.$timing.text(timing);
+                this.$timing.parent().addClass('has-time');
             }.bind(this));
 
             return this;

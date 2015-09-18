@@ -70,6 +70,11 @@ footer p:first-child {
 
 footer p.timing {
     text-align: right;
+    display: none;
+}
+
+p.timing.has-time {
+    display: block;
 }
 
 a {
@@ -212,7 +217,7 @@ button:active {
 }
 
 .image-stack .controls-group label {
-    margin-right: 1em;
+    margin-right: 0.7em;
 }
 
 input[type="file"] {

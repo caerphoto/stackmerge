@@ -55,7 +55,14 @@ define([
             $(evt.target).closest('li').toggleClass('using', visible);
         },
         changeBlendingMode: function () {
-            this.preview.set('blendingMode', this.elBlendingMode.value);
+            var value = this.elBlendingMode.value.split(':');
+            var mode = value[0];
+            var quality = value[1];
+
+            this.preview.set('blendingMode', mode);
+            if (quality) {
+                this.preview.set('highQuality', quality === 'high');
+            }
         }
 
     });

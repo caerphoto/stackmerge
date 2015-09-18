@@ -21,7 +21,8 @@ html
         div
           label(for="blending-mode") Merge mode
           select#blending-mode
-            option(value="edges") Focus
+            option(value="edges:low") Focus (low quality)
+            option(value="edges:high") Focus (high quality)
             option(value="median", selected) Median
 
       p.hint You can drag and drop images here to load them.
@@ -57,7 +58,7 @@ html
         |  &middot; inspired by 
         a(href="https://luminous-landscape.com/making-people-and-other-things-go-away/") this Luminous Landscape article
       p.timing
-        | Processed images in 
+        | Merged images in 
         span ?
         |  seconds
 

@@ -58,6 +58,8 @@ function mergeImages() {
                 stackPixels[imageIndex] = allPixels[imageIndex][b];
             }
 
+            // In Chrome this custom quicksort is about 3 times faster than
+            // stackPixels.sort()
             quickSort(stackPixels, 0, numImages);
             combined[b] = stackPixels[medianIndex];
         }
