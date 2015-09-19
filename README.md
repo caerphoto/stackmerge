@@ -10,7 +10,7 @@ A web app for merging images in one of two ways:
     as loading ten 24 megapixel images into a browser is rather slow. It does work
     though, eventually.
 
-2. Using the pixels with the highest contrast, also known as [focus stacking](https://en.wikipedia.org/wiki/Focus_stacking)
+2. Using the pixels with the highest contrast, also known as [focus stacking](https://en.wikipedia.org/wiki/Focus_stacking).
 
 Live application running at <http://stackmerge.andyf.me/>
 
@@ -38,7 +38,9 @@ and save it to a timestamp-named file which the application detects on startup
 in production mode.
 
 Just run `grunt` in the project directory; the default task will do the
-necessary.
+necessary. After that you can run `npm start --production`, and the app will
+only listen for connections on `localhost:8377` (as opposed to `0.0.0.0:8377` in
+dev mode).
 
 ## Not done yet
 
