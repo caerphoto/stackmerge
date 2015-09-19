@@ -10,7 +10,8 @@
     "photo",
     "merge",
     "stack",
-    "median"
+    "median",
+    "focus"
   ],
   "repository": {
     "type": "git",
@@ -22,9 +23,7 @@
     "glob": "~5.0",
     "morgan": "^1.6",
     "express": "^4.13.3",
-    "jade": "^1.11.0"
-  },
-  "devDependencies": {
+    "jade": "^1.11.0",
     "grunt": "~0.4",
     "grunt-contrib-requirejs": "~0.4"
   }
