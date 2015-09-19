@@ -53,13 +53,61 @@ function calculateOffsets(channels, imageWidth) {
     }
 }
 
+function createFocusMasks(numImages, dataSize, imageWidth, onePercent) {
+    var blurredImages = [];
+    var masks = [];
+    var imageIndex;
+    var b, b4;
+
+    for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
+        blurredImages[imageIndex] = new Uint8Array(dataSize);
+        masks[imageIndex] = new Uint8Array(dataSize);
+    }
+
+    console.time('blurred images');
+    calculateOffsets(4, imageWidth);
+    for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
+        for (b = 0, b4 = 1; b !== dataSize; b += 1, b4 += 4) {
+            blurredImages[imageIndex][b] = pixelByApplyingMatrix(
+                matrixGaussian,
+                sourceImages[imageIndex],
+                b4
+            ) / 16;
+
+        }
+
+        if (b % onePercent === 0) {
+            postMessage(null);
+        }
+    }
+    console.timeEnd('blurred images');
+
+    console.time('edge detect');
+    calculateOffsets(1, imageWidth);
+    for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
+        for (b = 0; b !== dataSize; b += 1) {
+            masks[imageIndex][b] = abs(pixelByApplyingMatrix(
+                matrixLaplacian,
+                blurredImages[imageIndex],
+                b
+            ));
+        }
+
+        if (b % onePercent === 0) {
+            postMessage(null);
+        }
+    }
+    console.timeEnd('edge detect');
+
+    return masks;
+}
+
 
 function mergeImages(highQuality, numWorkers, imageWidth) {
     var combined = new Uint8Array(sourceImages[0].length);
     var dataSize = sourceImages[0].length / 4;
 
-    var blurredImages = [];
-    var focusMasks = [];
+    var focusMasks;
 
     var b;
     var b4;
@@ -71,109 +119,34 @@ function mergeImages(highQuality, numWorkers, imageWidth) {
     var numPasses = highQuality ? 3 : 2;
     var onePercent = Math.round(dataSize / (100 / (numWorkers * numPasses)));
 
-    function createBlurredSource() {
-        calculateOffsets(4, imageWidth);
-        for (b = 0; b !== dataSize; b += 1) {
-            for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
-                blurredImages[imageIndex][b] = pixelByApplyingMatrix(
-                    matrixGaussian,
-                    sourceImages[imageIndex],
-                    (b + 1) * 4
-                ) / 16;
-            }
-            if (b % onePercent === 0) {
-                postMessage(null);
-            }
-        }
+    focusMasks = createFocusMasks(numImages, dataSize, imageWidth, onePercent);
 
-    }
-
-    if (highQuality) {
-        // Set up buffers for blurred image data and focus masks.
-        for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
-            blurredImages[imageIndex] = new Uint8Array(dataSize);
-            focusMasks[imageIndex] = new Uint8Array(dataSize);
-        }
-
-        createBlurredSource();
-
-        // Second pass applies Laplacian edge detection on each of the blurred
-        // images to create a focus mask for each one.
-        calculateOffsets(1, imageWidth);
-        for (b = 0; b !== dataSize; b += 1) {
-            for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
-                focusMasks[imageIndex][b] = abs(pixelByApplyingMatrix(
-                    matrixLaplacian,
-                    blurredImages[imageIndex],
-                    b
-                ));
-            }
-            if ((b + 1) % onePercent === 0) {
-                postMessage(null);
-            }
-        }
-
-        blurredImages = null;
-
-        // Third pass finds the pixel in a gaussian blurred version of each
-        // focus mask image with the highest value. The index of this image is
-        // used as the index into the stack of source images.
-        for (b = 0; b !== dataSize; b += 1) {
-            for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
+    console.time('blurred from source');
+    for (b = 0, b4 = 0; b !== dataSize; b += 1, b4 += 4) {
+        for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
+            if (highQuality) {
                 stackPixels[imageIndex] = pixelByApplyingMatrix(
                     matrixGaussian,
                     focusMasks[imageIndex],
                     b
                 ) / 16;
-            }
+            } else {
+                stackPixels[imageIndex] = focusMasks[imageIndex][b];
 
-            b4 = b * 4;
-            imageIndex = indexOfMax(stackPixels, numImages);
-            combined[b4] = sourceImages[imageIndex][b4];
-            combined[b4 + 1] = sourceImages[imageIndex][b4 + 1];
-            combined[b4 + 2] = sourceImages[imageIndex][b4 + 2];
-            combined[b4 + 3] = 255;
-
-            if ((b + 1) % onePercent === 0) {
-                postMessage(null);
             }
         }
-    } else {
-        // Set up buffers for blurred image data.
-        for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
-            blurredImages[imageIndex] = new Uint8Array(dataSize);
-        }
 
-        // First pass creates a gaussian-blurred copy of the green channel of
-        // each source image. This is common to both low and high quality
-        // merges.
-        createBlurredSource();
+        imageIndex = indexOfMax(stackPixels, numImages);
+        combined[b4] = sourceImages[imageIndex][b4];
+        combined[b4 + 1] = sourceImages[imageIndex][b4 + 1];
+        combined[b4 + 2] = sourceImages[imageIndex][b4 + 2];
+        combined[b4 + 3] = 255;
 
-        // Second pass applies Laplacian edge detection on the blurred images,
-        // and the index of the image with the strongest edge is used to index
-        // the source image at each pixel location.
-        calculateOffsets(1, imageWidth);
-        for (b = 0; b !== dataSize; b += 1) {
-            for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
-                stackPixels[imageIndex] = abs(pixelByApplyingMatrix(
-                    matrixLaplacian,
-                    blurredImages[imageIndex],
-                    b
-                ));
-            }
-
-            b4 = b * 4;
-            imageIndex = indexOfMax(stackPixels, numImages);
-            combined[b4] = sourceImages[imageIndex][b4];
-            combined[b4 + 1] = sourceImages[imageIndex][b4 + 1];
-            combined[b4 + 2] = sourceImages[imageIndex][b4 + 2];
-            combined[b4 + 3] = 255;
-
-            if (b % onePercent === 0) {
-                postMessage(null);
-            }
+        if (b % onePercent === 0) {
+            postMessage(null);
         }
     }
+    console.timeEnd('blurred from source');
 
     sourceImages = [];
     postMessage(combined.buffer, [combined.buffer]);

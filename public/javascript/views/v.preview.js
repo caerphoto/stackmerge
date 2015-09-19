@@ -79,8 +79,8 @@ define([
             }
         },
 
-        formatSeconds: function (seconds) {
-            return (seconds < 10 ?
+        formatSeconds: function (seconds, fractional) {
+            return (seconds < 10 && fractional ?
                 seconds.toPrecision(2) :
                 Math.round(seconds)) + ' seconds';
         },
@@ -90,7 +90,7 @@ define([
             var minuteWord = ' minute ';
 
             if (seconds < 70) {
-                return this.formatSeconds(seconds);
+                return this.formatSeconds(seconds, true);
             }
 
             minutes = Math.floor(seconds / 60);
@@ -121,9 +121,7 @@ define([
                 return this;
             }
 
-            this.$el.addClass('working');
             this.elCancel.focus();
-            this.elProgressBar.value = 0;
 
             timingStart = performance && performance.now() || Date.now();
             this.model.startedAt = Date.now();
@@ -142,6 +140,9 @@ define([
             var remaining = model.get('timeRemaining') / 1000;
             this.elProgressBar.value = progress;
             this.$remaining.text(this.formatTiming(remaining));
+            if (progress !== 0) {
+                this.$el.addClass('working');
+            }
         },
         cancelProcessing: function () {
             this.$el.removeClass('working');

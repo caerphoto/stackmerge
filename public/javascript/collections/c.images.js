@@ -9,7 +9,7 @@ define([
 ) {
     var ImagesCollection = Backbone.Collection.extend({
         model: ImageModel,
-        imagesToLoad: 0,
+        numImagesToLoad: 0,
         workerPaths: {
             edges: '/assets/javascript/workers/edges_processor.js',
             median: '/assets/javascript/workers/median_processor.js'
@@ -27,10 +27,11 @@ define([
         },
         imageDataReady: function (model, imageData) {
             if (imageData) {
-                this.imagesToLoad -= 1;
+                this.numImagesToLoad -= 1;
+                this.preview.set('progress', this.preview.get('progress') + this.percentPerImage);
             }
 
-            if (this.imagesToLoad === 0) {
+            if (this.numImagesToLoad === 0) {
                 this.preview.set('size', {
                     width: imageData.width,
                     height: imageData.height
@@ -40,12 +41,18 @@ define([
                 }.bind(this), 50);
             }
 
-            if (this.imagesToLoad < 0) {
-                throw new Error('imagesToLoad became less than 0');
+            if (this.numImagesToLoad < 0) {
+                throw new Error('numImagesToLoad became less than 0');
             }
         },
         addFromFiles: function (files) {
-            this.imagesToLoad += files.length;
+            this.numImagesToLoad += files.length;
+            this.percentPerImage = 100 / this.numImagesToLoad;
+
+            this.preview.set({
+                message: 'Loading',
+                progress: 0
+            });
 
             _.forEach(files, function (file) {
                 this.push({
@@ -136,7 +143,8 @@ define([
                     });
                 } catch (e) {
                     console.warn('Failed to create array buffers after',
-                        index - 1, 'images');
+                        index - 1, 'images, possibly due to memory restrictions:');
+                    console.log(e);
                 }
 
             }, this);
@@ -151,13 +159,10 @@ define([
                     }, false);
                 }(this.workers[index], this));
 
-                this.workers[index].index = index; // !
+                this.workers[index].index = index; // iiiiiii!
+
+                this.processedBuffers[index] = null;
             }, this);
-
-            this.processedBuffers = this.processedBuffers.map(function () {
-                return null;
-            });
-
         },
 
         generateCombinedImageData: function (highQuality, fnDone) {

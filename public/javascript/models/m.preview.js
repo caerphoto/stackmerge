@@ -8,7 +8,8 @@ define([
             size: { width: 0, height: 0 },
             progress: 0,
             mergeMode: 'median',
-            timeRemaining: 0
+            timeRemaining: 0,
+            message: 'Working'
         },
         initialize: function () {
             this.on('change:progress', this.updatePrediction);
