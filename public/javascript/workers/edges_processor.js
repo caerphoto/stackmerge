@@ -182,7 +182,7 @@ function mergeImages(highQuality, numWorkers, imageWidth) {
 
 onmessage = function (message) {
     var data = message.data;
-    if (data.width) {
+    if (data.imageWidth) {
         mergeImages(data.highQuality, data.numWorkers, data.imageWidth);
     } else if (data.byteLength) {
         sourceImages.push(new Uint8Array(data));

@@ -13,14 +13,14 @@ define([
         events: {
             'click .remove': 'removeImage',
             'change .toggle': 'toggleImageVisibility',
-            'change #blending-mode': 'changeBlendingMode'
+            'change #merge-mode': 'changeMergeMode'
         },
         initialize: function (options) {
             this.images = options.images;
             this.preview = options.previewModel;
 
             this.elThumbnails = this.$('ol').get(0);
-            this.elBlendingMode = document.querySelector('#blending-mode');
+            this.elMergeMode = document.querySelector('#merge-mode');
 
             this.listenTo(this.images, 'add remove reset', this.render);
             this.listenTo(this.images, 'change:thumbnailURL', this.updateThumb);
@@ -54,12 +54,12 @@ define([
             model.set('visible', visible);
             $(evt.target).closest('li').toggleClass('using', visible);
         },
-        changeBlendingMode: function () {
-            var value = this.elBlendingMode.value.split(':');
+        changeMergeMode: function () {
+            var value = this.elMergeMode.value.split(':');
             var mode = value[0];
             var quality = value[1];
 
-            this.preview.set('blendingMode', mode);
+            this.preview.set('mergeMode', mode);
             if (quality) {
                 this.preview.set('highQuality', quality === 'high');
             }

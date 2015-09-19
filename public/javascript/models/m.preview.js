@@ -7,7 +7,7 @@ define([
         defaults: {
             size: { width: 0, height: 0 },
             progress: 0,
-            blendingMode: 'median',
+            mergeMode: 'median',
             timeRemaining: 0
         },
         initialize: function () {

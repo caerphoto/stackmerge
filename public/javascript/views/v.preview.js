@@ -25,7 +25,7 @@ define([
                 'imagesLoaded remove reset change:visible',
                 this.render
             );
-            this.listenTo(this.model, 'change:blendingMode change:highQuality', this.render);
+            this.listenTo(this.model, 'change:mergeMode change:highQuality', this.render);
             this.listenTo(this.model, 'change:size', this.setPreviewSize);
             this.listenTo(this.model, 'change:progress', this.updateProgress);
 

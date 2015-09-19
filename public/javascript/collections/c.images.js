@@ -20,16 +20,10 @@ define([
             this.on('change:imageData', this.imageDataReady);
             this.working = false;
 
-            this.numWorkers = 2;
+            this.numWorkers = 4;
 
             this.workers = [];
             this.processedBuffers = [];
-            // Initialize to null so we can use .map() to operate on the arrays
-            // later (map will skip over undefined items).
-            _.times(this.numWorkers, function (index) {
-                this.workers[index] = null;
-                this.processedBuffers[index] = null;
-            }, this);
         },
         imageDataReady: function (model, imageData) {
             if (imageData) {
@@ -107,57 +101,21 @@ define([
             }
         },
 
-        onWorkerMessage: function (data, id, callback) {
+        onWorkerMessage: function (worker, data, callback) {
             if (data && data.byteLength) {
-                this.processedBuffers[id] = data;
+                this.processedBuffers[worker.index] = data;
             } else {
                 this.preview.set('progress', this.preview.get('progress') + 1);
             }
             this.callbackIfComplete(callback);
         },
 
-        generateCombinedImageData: function (highQuality, done) {
-            var allData = _.map(this.getVisible(true), function (model) {
-                return model.get('imageData');
-            });
-            var blendingMode = this.preview.get('blendingMode');
-
-            if (!_.every(this.getVisible(), function (model) {
-                return model.get('imageData') !== null;
-            })) {
-                return null;
-            }
-
-            if (!_.isFunction(done)) {
-                return null;
-            }
-
-            if (this.working) {
-                this.terminateWorkers();
-            }
-
-            this.workers = this.workers.map(function (worker, index) {
-                worker = new Worker(this.workerPaths[blendingMode]);
-                worker.addEventListener('message', function (message) {
-                    this.onWorkerMessage(message.data, index, done);
-                }.bind(this), false);
-                return worker;
-            }, this);
-
-            this.working = true;
-            this.processedBuffers = this.processedBuffers.map(function () {
-                return null;
-            });
-            this.preview.set('progress', 0);
-            this.imageSize = {
-                width: allData[0].width,
-                height: allData[0].height
-            };
-
+        sendImageData: function (allData) {
             allData.forEach(function (imageData, index) {
                 var len = imageData.data.buffer.byteLength;
                 var chunkSize = Math.floor((len / 4) / this.numWorkers) * 4;
                 var buffer;
+
                 try {
                     this.workers.forEach(function (worker, index, workers) {
                         if (index < workers.length - 1) {
@@ -180,11 +138,62 @@ define([
                     console.warn('Failed to create array buffers after',
                         index - 1, 'images');
                 }
+
             }, this);
+        },
+
+        setupWorkersAndBuffers: function (fnDone, mergeMode) {
+            _.times(this.numWorkers, function (index) {
+                this.workers[index] = new Worker(this.workerPaths[mergeMode]);
+                (function (worker, collection) {
+                    worker.addEventListener('message', function (message) {
+                        collection.onWorkerMessage(worker, message.data, fnDone);
+                    }, false);
+                }(this.workers[index], this));
+
+                this.workers[index].index = index; // !
+            }, this);
+
+            this.processedBuffers = this.processedBuffers.map(function () {
+                return null;
+            });
+
+        },
+
+        generateCombinedImageData: function (highQuality, fnDone) {
+            var allData = _.map(this.getVisible(true), function (model) {
+                return model.get('imageData');
+            });
+            var mergeMode = this.preview.get('mergeMode');
+
+            if (!_.every(this.getVisible(), function (model) {
+                return model.get('imageData') !== null;
+            })) {
+                return null;
+            }
+
+            if (!_.isFunction(fnDone)) {
+                return null;
+            }
+
+            if (this.working) {
+                this.terminateWorkers();
+            }
+
+            this.setupWorkersAndBuffers(fnDone, mergeMode);
+
+            this.working = true;
+            this.preview.set('progress', 0);
+            this.imageSize = {
+                width: allData[0].width,
+                height: allData[0].height
+            };
+
+            this.sendImageData(allData);
 
             this.workers.forEach(function (worker) {
                 worker.postMessage({
-                    width: this.imageSize.width,
+                    imageWidth: this.imageSize.width,
                     highQuality: highQuality,
                     numWorkers: this.numWorkers
                 });
