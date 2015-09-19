@@ -32,7 +32,7 @@ function quickSort(array, left, right) {
     }
 }
 
-function mergeImages() {
+function mergeImages(numWorkers) {
     var combined = new Uint8Array(allPixels[0].length);
     var dataSize = combined.length;
 
@@ -45,9 +45,7 @@ function mergeImages() {
     var stackPixels = new Uint8Array(numImages);
     var medianIndex = floor(numImages / 2);
 
-    // By 50 because each instance of this worker only handles half the image
-    // data.
-    var onePercent = floor(dataSize / 50);
+    var onePercent = Math.round(dataSize / (100 / numWorkers));
 
     for (b = 0; b !== dataSize; b += 1) {
         if ((b + 1) % 4 === 0) {
@@ -75,8 +73,8 @@ function mergeImages() {
 }
 
 onmessage = function (message) {
-    if (message.data === 'start fast' || message.data === 'start nice') {
-        mergeImages();
+    if (message.data.numWorkers) {
+        mergeImages(message.data.numWorkers);
     } else if (message.data.byteLength) {
         allPixels.push(new Uint8Array(message.data));
     }

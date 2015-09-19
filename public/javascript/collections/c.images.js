@@ -19,6 +19,17 @@ define([
 
             this.on('change:imageData', this.imageDataReady);
             this.working = false;
+
+            this.numWorkers = 2;
+
+            this.workers = [];
+            this.processedBuffers = [];
+            // Initialize to null so we can use .map() to operate on the arrays
+            // later (map will skip over undefined items).
+            _.times(this.numWorkers, function (index) {
+                this.workers[index] = null;
+                this.processedBuffers[index] = null;
+            }, this);
         },
         imageDataReady: function (model, imageData) {
             if (imageData) {
@@ -62,27 +73,35 @@ define([
         },
 
         concatBuffers: function (buffers) {
-            var tmp = new Uint8Array(buffers[0].byteLength + buffers[1].byteLength);
-            tmp.set(new Uint8Array(buffers[0]), 0);
-            tmp.set(new Uint8Array(buffers[1]), buffers[0].byteLength);
+            var totalSize = buffers.reduce(function (sum, buffer) {
+                return sum + buffer.byteLength;
+            }, 0);
+            var tmp = new Uint8Array(totalSize);
+            buffers.forEach(function (buffer, index) {
+                var ua = new Uint8Array(buffer);
+                tmp.set(ua, index * buffer.byteLength);
+            });
             return tmp.buffer;
         },
 
         callbackIfComplete: function (callback) {
-            var ctx;
             var buffer;
+            var ctx;
             var imageData;
 
-            if (this.processedBuffers[0] && this.processedBuffers[1]) {
+            var allComplete = this.processedBuffers.every(function (buffer) {
+                return buffer && buffer.byteLength;
+            });
+            if (allComplete) {
                 // MS Edge doesn't support the ImageData() constructor, so we
                 // have to create an ImageData object in a slightly roundabout
                 // way.
+                buffer = this.concatBuffers(this.processedBuffers);
                 ctx = document.createElement('canvas').getContext('2d');
                 imageData = ctx.createImageData(
                     this.imageSize.width,
                     this.imageSize.height
                 );
-                buffer = this.concatBuffers(this.processedBuffers);
                 imageData.data.set(new Uint8ClampedArray(buffer));
                 callback(imageData);
             }
@@ -117,18 +136,18 @@ define([
                 this.terminateWorkers();
             }
 
-            this.worker1 = new Worker(this.workerPaths[blendingMode]);
-            this.worker2 = new Worker(this.workerPaths[blendingMode]);
-
-            this.worker1.addEventListener('message', function (message) {
-                this.onWorkerMessage(message.data, 0, done);
-            }.bind(this), false);
-            this.worker2.addEventListener('message', function (message) {
-                this.onWorkerMessage(message.data, 1, done);
-            }.bind(this), false);
+            this.workers = this.workers.map(function (worker, index) {
+                worker = new Worker(this.workerPaths[blendingMode]);
+                worker.addEventListener('message', function (message) {
+                    this.onWorkerMessage(message.data, index, done);
+                }.bind(this), false);
+                return worker;
+            }, this);
 
             this.working = true;
-            this.processedBuffers = [false, false];
+            this.processedBuffers = this.processedBuffers.map(function () {
+                return null;
+            });
             this.preview.set('progress', 0);
             this.imageSize = {
                 width: allData[0].width,
@@ -137,36 +156,45 @@ define([
 
             allData.forEach(function (imageData, index) {
                 var len = imageData.data.buffer.byteLength;
-                var buffer1, buffer2;
+                var chunkSize = Math.floor((len / 4) / this.numWorkers) * 4;
+                var buffer;
                 try {
-                    buffer1 = imageData.data.buffer.slice(0, len / 2);
-                    buffer2 = imageData.data.buffer.slice(len / 2, len);
-                    this.worker1.postMessage(buffer1, [buffer1]);
-                    this.worker2.postMessage(buffer2, [buffer2]);
+                    this.workers.forEach(function (worker, index, workers) {
+                        if (index < workers.length - 1) {
+                            // All but the last worker get a rounded down chunk
+                            // of the buffer.
+                            buffer = imageData.data.buffer.slice(
+                                index * chunkSize,
+                                index * chunkSize + chunkSize
+                            );
+                        } else {
+                            // Last worker gets the remainder of the buffer.
+                            buffer = imageData.data.buffer.slice(
+                                index * chunkSize,
+                                len
+                            );
+                        }
+                        worker.postMessage(buffer, [buffer]);
+                    });
                 } catch (e) {
                     console.warn('Failed to create array buffers after',
                         index - 1, 'images');
                 }
             }, this);
 
-            this.worker1.postMessage(allData[0].width);
-            this.worker2.postMessage(allData[0].width);
+            this.workers.forEach(function (worker) {
+                worker.postMessage({
+                    width: this.imageSize.width,
+                    highQuality: highQuality,
+                    numWorkers: this.numWorkers
+                });
+            }, this);
 
-            if (highQuality) {
-                this.worker1.postMessage('start nice');
-                this.worker2.postMessage('start nice');
-            } else {
-                this.worker1.postMessage('start fast');
-                this.worker2.postMessage('start fast');
-            }
         },
         terminateWorkers: function () {
-            if (this.worker1) {
-                this.worker1.terminate();
-            }
-            if (this.worker2) {
-                this.worker2.terminate();
-            }
+            this.workers.forEach(function (worker) {
+                worker.terminate();
+            });
         }
     });
 

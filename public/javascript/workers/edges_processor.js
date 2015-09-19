@@ -1,12 +1,8 @@
 /*global postMessage, onmessage:true */
-/* Quicksort implementation from
-* http://blog.mgechev.com/2012/11/24/javascript-sorting-performance-quicksort-v8/
-*/
 var sourceImages = [];
 
 var abs = Math.abs;
 
-var imageWidth = 0;
 var offsets = [];
 var matrixGaussian = [
     1, 2, 1,
@@ -44,7 +40,7 @@ function indexOfMax(array, length) {
     return maxIndex;
 }
 
-function calculateOffsets(channels) {
+function calculateOffsets(channels, imageWidth) {
     // Pre-calculate pixel data offsets for surrounding pixels, for use in
     // matrix functions.
     var x, y;
@@ -58,7 +54,7 @@ function calculateOffsets(channels) {
 }
 
 
-function mergeImages(lowQuality) {
+function mergeImages(highQuality, numWorkers, imageWidth) {
     var combined = new Uint8Array(sourceImages[0].length);
     var dataSize = sourceImages[0].length / 4;
 
@@ -72,17 +68,11 @@ function mergeImages(lowQuality) {
     var numImages = sourceImages.length;
     var stackPixels = new Uint8Array(numImages);
 
-    // By 16.666 (i.e. 100 / 6) because each instance of this worker only
-    // handles half the image data, and we loop through the pixel data three
-    // times. In low quality mode we only loop through twice, skipping the
-    // final blurring pass.
-    var onePercent = lowQuality ?
-        Math.round(dataSize / 25) :
-        Math.round(dataSize / 16.6666);
-
+    var numPasses = highQuality ? 3 : 2;
+    var onePercent = Math.round(dataSize / (100 / (numWorkers * numPasses)));
 
     function createBlurredSource() {
-        calculateOffsets(4);
+        calculateOffsets(4, imageWidth);
         for (b = 0; b !== dataSize; b += 1) {
             for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
                 blurredImages[imageIndex][b] = pixelByApplyingMatrix(
@@ -98,43 +88,7 @@ function mergeImages(lowQuality) {
 
     }
 
-    if (lowQuality) {
-        // Set up buffers for blurred image data.
-        for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
-            blurredImages[imageIndex] = new Uint8Array(dataSize);
-        }
-
-        // First pass creates a gaussian-blurred copy of the green channel of
-        // each source image. This is common to both low and high quality
-        // merges.
-        createBlurredSource();
-
-        // Second pass applies Laplacian edge detection on the blurred images,
-        // and the index of the image with the strongest edge is used to index
-        // the source image at each pixel location.
-        calculateOffsets(1);
-        for (b = 0; b !== dataSize; b += 1) {
-            for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
-                stackPixels[imageIndex] = abs(pixelByApplyingMatrix(
-                    matrixLaplacian,
-                    blurredImages[imageIndex],
-                    b
-                ));
-            }
-
-            b4 = b * 4;
-            imageIndex = indexOfMax(stackPixels, numImages);
-            combined[b4] = sourceImages[imageIndex][b4];
-            combined[b4 + 1] = sourceImages[imageIndex][b4 + 1];
-            combined[b4 + 2] = sourceImages[imageIndex][b4 + 2];
-            combined[b4 + 3] = 255;
-
-            if (b % onePercent === 0) {
-                postMessage(null);
-            }
-        }
-
-    } else {
+    if (highQuality) {
         // Set up buffers for blurred image data and focus masks.
         for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
             blurredImages[imageIndex] = new Uint8Array(dataSize);
@@ -145,7 +99,7 @@ function mergeImages(lowQuality) {
 
         // Second pass applies Laplacian edge detection on each of the blurred
         // images to create a focus mask for each one.
-        calculateOffsets(1);
+        calculateOffsets(1, imageWidth);
         for (b = 0; b !== dataSize; b += 1) {
             for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
                 focusMasks[imageIndex][b] = abs(pixelByApplyingMatrix(
@@ -184,6 +138,41 @@ function mergeImages(lowQuality) {
                 postMessage(null);
             }
         }
+    } else {
+        // Set up buffers for blurred image data.
+        for (imageIndex = 0; imageIndex < numImages; imageIndex += 1) {
+            blurredImages[imageIndex] = new Uint8Array(dataSize);
+        }
+
+        // First pass creates a gaussian-blurred copy of the green channel of
+        // each source image. This is common to both low and high quality
+        // merges.
+        createBlurredSource();
+
+        // Second pass applies Laplacian edge detection on the blurred images,
+        // and the index of the image with the strongest edge is used to index
+        // the source image at each pixel location.
+        calculateOffsets(1, imageWidth);
+        for (b = 0; b !== dataSize; b += 1) {
+            for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
+                stackPixels[imageIndex] = abs(pixelByApplyingMatrix(
+                    matrixLaplacian,
+                    blurredImages[imageIndex],
+                    b
+                ));
+            }
+
+            b4 = b * 4;
+            imageIndex = indexOfMax(stackPixels, numImages);
+            combined[b4] = sourceImages[imageIndex][b4];
+            combined[b4 + 1] = sourceImages[imageIndex][b4 + 1];
+            combined[b4 + 2] = sourceImages[imageIndex][b4 + 2];
+            combined[b4 + 3] = 255;
+
+            if (b % onePercent === 0) {
+                postMessage(null);
+            }
+        }
     }
 
     sourceImages = [];
@@ -192,13 +181,10 @@ function mergeImages(lowQuality) {
 }
 
 onmessage = function (message) {
-    if (message.data === 'start nice') {
-        mergeImages();
-    } else if (message.data === 'start fast') {
-        mergeImages(true);
-    } else if (message.data.byteLength) {
-        sourceImages.push(new Uint8Array(message.data));
-    } else {
-        imageWidth = message.data;
+    var data = message.data;
+    if (data.width) {
+        mergeImages(data.highQuality, data.numWorkers, data.imageWidth);
+    } else if (data.byteLength) {
+        sourceImages.push(new Uint8Array(data));
     }
 };
