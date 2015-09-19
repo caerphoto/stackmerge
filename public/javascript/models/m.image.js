@@ -1,16 +1,18 @@
 define([
-    'backbone'
+    'models/m.base'
 ], function (
-    Backbone
+    BaseModel
 ) {
-    var ImageModel = Backbone.Model.extend({
+    var ImageModel = BaseModel.extend({
         defaults: {
             name: 'unnamed image',
             id: '',
             visible: true,
             thumbnailURL: '',
             imageData: null,
-            offset: { x: 0, y: 0 }
+            offset: { x: 0, y: 0 },
+            hasMask: false,
+            maskProgress: 0
         },
         THUMB_SIZE: 200,
         initialize: function (attributes) {
@@ -61,6 +63,35 @@ define([
                 this.loader.terminate();
             }.bind(this);
             image.src = message.data;
+        },
+
+        maskGenerated: function (mask, fnDone) {
+            var imageData = this.get('imageData');
+            imageData.data.set(new Uint8ClampedArray(mask));
+            this.set('hasMask', true);
+            fnDone();
+        },
+        generateFocusMask: function (numImages, fnDone) {
+            var imageData = this.get('imageData');
+            if (!imageData) {
+                throw new Error('Unable to create focus mask before image data is ready.');
+            }
+
+            this.set('maskProgress', 0);
+            this.maskWorker = new Worker('/assets/javascript/workers/focus_mask.js');
+            this.maskWorker.onmessage = function (message) {
+                if (message.data) {
+                    this.maskGenerated(message.data, fnDone);
+                    this.maskWorker = null;
+                } else {
+                    this.increment('maskProgress');
+                }
+            }.bind(this);
+            this.maskWorker.postMessage(imageData.data.buffer.slice(0));
+            this.maskWorker.postMessage({
+                imageWidth: imageData.width,
+                numImages: numImages
+            });
         }
     });
 

@@ -11,34 +11,33 @@ define([
         model: ImageModel,
         numImagesToLoad: 0,
         workerPaths: {
-            edges: '/assets/javascript/workers/edges_processor.js',
+            focus: '/assets/javascript/workers/focus_processor.js',
             median: '/assets/javascript/workers/median_processor.js'
         },
         initialize: function (attrs, options) {
-            this.preview = options.previewModel;
+            this.previewModel = options.previewModel;
 
             this.on('change:imageData', this.imageDataReady);
+            this.on('change:maskProgress', this.updateMaskProgress);
             this.working = false;
-
-            this.numWorkers = 4;
-
-            this.workers = [];
-            this.processedBuffers = [];
+            this.worker = null;
         },
+
         imageDataReady: function (model, imageData) {
             if (imageData) {
                 this.numImagesToLoad -= 1;
-                this.preview.set('progress', this.preview.get('progress') + this.percentPerImage);
+                this.previewModel.increment('progress', this.percentPerImage);
             }
 
             if (this.numImagesToLoad === 0) {
-                this.preview.set('size', {
+                this.previewModel.set('size', {
                     width: imageData.width,
                     height: imageData.height
                 });
                 setTimeout(function () {
                     this.trigger('imagesLoaded');
                 }.bind(this), 50);
+                this.previewModel.set('progress', false);
             }
 
             if (this.numImagesToLoad < 0) {
@@ -49,11 +48,17 @@ define([
             this.numImagesToLoad += files.length;
             this.percentPerImage = 100 / this.numImagesToLoad;
 
-            this.preview.set({
-                message: 'Loading',
+            if (this.numImagesToLoad === 0) {
+                return;
+            }
+
+            this.previewModel.set({
+                processingMessage: 'Loading images',
                 progress: 0
             });
 
+            // Can't use files.forEach directly because it's not actually an
+            // Array.
             _.forEach(files, function (file) {
                 this.push({
                     name: file.name,
@@ -73,74 +78,45 @@ define([
             });
         },
 
-        concatBuffers: function (buffers) {
-            var totalSize = buffers.reduce(function (sum, buffer) {
-                return sum + buffer.byteLength;
-            }, 0);
-            var tmp = new Uint8Array(totalSize);
-            buffers.forEach(function (buffer, index) {
-                var ua = new Uint8Array(buffer);
-                tmp.set(ua, index * buffer.byteLength);
-            });
-            return tmp.buffer;
-        },
-
-        callbackIfComplete: function (callback) {
-            var buffer;
+        onWorkerMessage: function (buffer, fnDone) {
             var ctx;
             var imageData;
 
-            var allComplete = this.processedBuffers.every(function (buffer) {
-                return buffer && buffer.byteLength;
-            });
-            if (allComplete) {
-                // MS Edge doesn't support the ImageData() constructor, so we
-                // have to create an ImageData object in a slightly roundabout
-                // way.
-                buffer = this.concatBuffers(this.processedBuffers);
+            if (buffer && buffer.byteLength) {
                 ctx = document.createElement('canvas').getContext('2d');
                 imageData = ctx.createImageData(
                     this.imageSize.width,
                     this.imageSize.height
                 );
                 imageData.data.set(new Uint8ClampedArray(buffer));
-                callback(imageData);
-            }
-        },
 
-        onWorkerMessage: function (worker, data, callback) {
-            if (data && data.byteLength) {
-                this.processedBuffers[worker.index] = data;
+                fnDone(imageData);
             } else {
-                this.preview.set('progress', this.preview.get('progress') + 1);
+                // No buffer, so this is just a 'progress' message.
+                this.previewModel.increment('progress');
             }
-            this.callbackIfComplete(callback);
         },
 
-        sendImageData: function (allData) {
-            allData.forEach(function (imageData, index) {
-                var len = imageData.data.buffer.byteLength;
-                var chunkSize = Math.floor((len / 4) / this.numWorkers) * 4;
-                var buffer;
+        processImages: function (images, mergeMode, fnDone) {
+            // Send a copy of each image's data to the worker, then send a
+            // message to signal that processing should begin.
+
+            this.worker = new Worker(this.workerPaths[mergeMode]);
+            this.worker.onmessage = function (message) {
+                this.onWorkerMessage(message.data, fnDone);
+            }.bind(this);
+
+            this.previewModel.set({
+                progress: 0,
+                processingMessage: 'Merging images'
+            });
+
+            images.forEach(function (imageData, index) {
+                // Local slice() + transfer is faster than copy.
+                var buffer = imageData.data.buffer.slice(0);
 
                 try {
-                    this.workers.forEach(function (worker, index, workers) {
-                        if (index < workers.length - 1) {
-                            // All but the last worker get a rounded down chunk
-                            // of the buffer.
-                            buffer = imageData.data.buffer.slice(
-                                index * chunkSize,
-                                index * chunkSize + chunkSize
-                            );
-                        } else {
-                            // Last worker gets the remainder of the buffer.
-                            buffer = imageData.data.buffer.slice(
-                                index * chunkSize,
-                                len
-                            );
-                        }
-                        worker.postMessage(buffer, [buffer]);
-                    });
+                    this.worker.postMessage(buffer, [buffer]);
                 } catch (e) {
                     console.warn('Failed to create array buffers after',
                         index - 1, 'images, possibly due to memory restrictions:');
@@ -148,30 +124,54 @@ define([
                 }
 
             }, this);
+
+            this.worker.postMessage('start');
         },
 
-        setupWorkersAndBuffers: function (fnDone, mergeMode) {
-            _.times(this.numWorkers, function (index) {
-                this.workers[index] = new Worker(this.workerPaths[mergeMode]);
-                (function (worker, collection) {
-                    worker.addEventListener('message', function (message) {
-                        collection.onWorkerMessage(worker, message.data, fnDone);
-                    }, false);
-                }(this.workers[index], this));
+        updateMaskProgress: function () {
+            var meanProgress = this.reduce(function (sum, image) {
+                return sum + image.get('maskProgress');
+            }, 0) / this.length;
 
-                this.workers[index].index = index; // iiiiiii!
+            this.previewModel.set('progress', meanProgress);
+        },
 
-                this.processedBuffers[index] = null;
+        ensureFocusMasks: function (fnReady) {
+            var imagesWithoutMasks = this.filter(function (image) {
+                return !image.get('hasMask');
+            });
+            var imagesRemaining = imagesWithoutMasks.length;
+
+            if (imagesRemaining === 0) {
+                fnReady.call(this);
+                return;
+            }
+
+
+            function maskReady() {
+                imagesRemaining -= 1;
+                if (imagesRemaining === 0) {
+                    fnReady.call(this);
+                }
+            }
+
+            this.previewModel.set({
+                progress: 0,
+                processingMessage: 'Generating focus masks'
+            });
+
+            imagesWithoutMasks.forEach(function (image) {
+                image.generateFocusMask(imagesRemaining, maskReady.bind(this));
             }, this);
         },
 
-        generateCombinedImageData: function (highQuality, fnDone) {
-            var allData = _.map(this.getVisible(true), function (model) {
+        generateCombinedImageData: function (fnDone) {
+            var visibleImages = this.getVisible(true).map(function (model) {
                 return model.get('imageData');
             });
-            var mergeMode = this.preview.get('mergeMode');
+            var mergeMode = this.previewModel.get('mergeMode');
 
-            if (!_.every(this.getVisible(), function (model) {
+            if (!this.getVisible().every(function (model) {
                 return model.get('imageData') !== null;
             })) {
                 return null;
@@ -181,34 +181,31 @@ define([
                 return null;
             }
 
-            if (this.working) {
-                this.terminateWorkers();
-            }
-
-            this.setupWorkersAndBuffers(fnDone, mergeMode);
+            this.terminateWorkers();
 
             this.working = true;
-            this.preview.set('progress', 0);
             this.imageSize = {
-                width: allData[0].width,
-                height: allData[0].height
+                width: visibleImages[0].width,
+                height: visibleImages[0].height
             };
 
-            this.sendImageData(allData);
-
-            this.workers.forEach(function (worker) {
-                worker.postMessage({
-                    imageWidth: this.imageSize.width,
-                    highQuality: highQuality,
-                    numWorkers: this.numWorkers
+            if (mergeMode === 'focus') {
+                this.ensureFocusMasks(function () {
+                    this.processImages(visibleImages, mergeMode, fnDone);
                 });
-            }, this);
-
+            } else {
+                this.processImages(visibleImages, mergeMode, fnDone);
+            }
         },
         terminateWorkers: function () {
-            this.workers.forEach(function (worker) {
-                worker.terminate();
+            this.forEach(function (image) {
+                if (image.maskWorker) {
+                    image.maskWorker.terminate();
+                }
             });
+            if (this.worker) {
+                this.worker.terminate();
+            }
         }
     });
 

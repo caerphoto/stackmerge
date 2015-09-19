@@ -28,10 +28,13 @@ define([
             this.listenTo(this.model, 'change:mergeMode change:highQuality', this.render);
             this.listenTo(this.model, 'change:size', this.setPreviewSize);
             this.listenTo(this.model, 'change:progress', this.updateProgress);
+            this.listenTo(this.model, 'change:processingMessage', this.updateProcessingMessage);
 
             this.elPreviewImage = this.$('.preview-image').get(0);
             this.elProgressBar = this.$('.working-overlay progress').get(0);
             this.elCancel = this.$('button.cancel').get(0);
+
+            this.$processingMessage = this.$('.working-overlay .message');
             this.$timing = this.$el.parent().find('.timing span');
             this.$remaining = this.$('.working-overlay .remaining');
 
@@ -107,7 +110,6 @@ define([
             var firstImage;
             var timingStart;
             var performance = window.performance;
-            var highQuality = this.model.get('highQuality');
 
             visibleImages = this.images.getVisible();
             this.$el.toggleClass('has-images', visibleImages.length > 0);
@@ -125,11 +127,14 @@ define([
 
             timingStart = performance && performance.now() || Date.now();
             this.model.startedAt = Date.now();
-            this.images.generateCombinedImageData(highQuality, function (data) {
+
+            this.images.generateCombinedImageData(function (data) {
                 var timingEnd = performance && performance.now() || Date.now();
                 var timing = ((timingEnd - timingStart) / 1000);
+
                 outputCtx.putImageData(data, 0, 0);
-                this.$el.removeClass('working');
+
+                this.model.set('progress', false);
                 this.$timing.text(this.formatTiming(timing));
                 this.$timing.parent().addClass('has-time');
             }.bind(this));
@@ -140,13 +145,14 @@ define([
             var remaining = model.get('timeRemaining') / 1000;
             this.elProgressBar.value = progress;
             this.$remaining.text(this.formatTiming(remaining));
-            if (progress !== 0) {
-                this.$el.addClass('working');
-            }
+            this.$el.toggleClass('working', progress !== false);
         },
         cancelProcessing: function () {
-            this.$el.removeClass('working');
+            this.model.set('progress', false);
             this.images.terminateWorkers();
+        },
+        updateProcessingMessage: function (model, message) {
+            this.$processingMessage.text(message);
         },
         toggleZoom: function (evt) {
             this.$el.toggleClass('zoom-to-fit', evt.target.checked);

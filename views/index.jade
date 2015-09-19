@@ -21,8 +21,7 @@ html
         div
           label(for="merge-mode") Merge mode
           select#merge-mode
-            option(value="edges:low") Focus (low quality)
-            option(value="edges:high") Focus (high quality)
+            option(value="focus") Focus
             option(value="median", selected) Median
 
       p.hint You can drag and drop images here to load them.
@@ -34,9 +33,14 @@ html
 
     .preview.pane
       .working-overlay.dialog
-        p About 
+        p
+          span.message
+          | ;
+
+        p about 
           span.remaining
           |  remaining&hellip;
+
         progress(min="0", max="100", value="0")
         button.cancel Cancel
 

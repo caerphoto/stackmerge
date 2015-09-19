@@ -1,47 +1,44 @@
 define([
-    'backbone'
+    'models/m.base'
 ], function (
-    Backbone
+    BaseModel
 ) {
-    var PreviewModel = Backbone.Model.extend({
+    var PreviewModel = BaseModel.extend({
         defaults: {
             size: { width: 0, height: 0 },
             progress: 0,
             mergeMode: 'median',
             timeRemaining: 0,
-            message: 'Working'
+            timeAtProgressStart: null,
+
+            // This is what gets shown on the 'working' popup
+            processingMessage: 'Working'
         },
         initialize: function () {
             this.on('change:progress', this.updatePrediction);
-            this.progressTimestamps = [];
+            this.progressDeltas = [];
         },
         updatePrediction: function (model, progress) {
             var meanDelta;
             var remaining;
+            var timeAtStart = this.get('timeAtProgressStart');
 
             if (progress === 0) {
-                this.progressTimestamps = [];
+                this.progressDeltas = [];
                 this.set('timeRemaining', 0);
+                this.set('timeAtProgressStart', null);
                 return;
             }
 
-            this.progressTimestamps.push(Date.now());
-
-            // Need at least 2 timestamps to determine how long each 1% takes.
-            if (this.progressTimestamps.length < 2) {
-                return;
+            if (timeAtStart === null) {
+                timeAtStart = Date.now();
+                this.set('timeAtProgressStart', timeAtStart);
             }
+            this.progressDeltas.push((Date.now() - timeAtStart) / progress);
 
-            meanDelta = this.progressTimestamps.
-                //slice(-10).
-                reduce(function (deltas, timestamp, index, timestamps) {
-                    if (index < timestamps.length - 1) {
-                        deltas.push(timestamps[index + 1] - timestamp);
-                    }
-                    return deltas;
-                }, []).reduce(function (sum, interval) {
-                    return sum + interval;
-                }) / (this.progressTimestamps.length - 1);
+            meanDelta = this.progressDeltas.reduce(function (sum, delta) {
+                return sum + delta;
+            }) / this.progressDeltas.length;
 
             remaining = (100 - progress) * meanDelta;
             this.set('timeRemaining', remaining);

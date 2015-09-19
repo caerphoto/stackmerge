@@ -2,7 +2,7 @@
 /* Quicksort implementation from
 * http://blog.mgechev.com/2012/11/24/javascript-sorting-performance-quicksort-v8/
 */
-var allPixels = [];
+var sourceImage = [];
 
 function swap(array, i, j) {
     var temp = array[i];
@@ -32,8 +32,8 @@ function quickSort(array, left, right) {
     }
 }
 
-function mergeImages(numWorkers) {
-    var combined = new Uint8Array(allPixels[0].length);
+function mergeImages() {
+    var combined = new Uint8Array(sourceImage[0].length);
     var dataSize = combined.length;
 
     var floor = Math.floor; // Slight optimisation - avoids property lookup
@@ -41,11 +41,11 @@ function mergeImages(numWorkers) {
     var b;
 
     var imageIndex;
-    var numImages = allPixels.length;
+    var numImages = sourceImage.length;
     var stackPixels = new Uint8Array(numImages);
     var medianIndex = floor(numImages / 2);
 
-    var onePercent = Math.round(dataSize / (100 / numWorkers));
+    var onePercent = Math.round(dataSize / 100);
 
     for (b = 0; b !== dataSize; b += 1) {
         if ((b + 1) % 4 === 0) {
@@ -53,7 +53,7 @@ function mergeImages(numWorkers) {
             combined[b] = 255;
         } else {
             for (imageIndex = 0; imageIndex !== numImages; imageIndex += 1) {
-                stackPixels[imageIndex] = allPixels[imageIndex][b];
+                stackPixels[imageIndex] = sourceImage[imageIndex][b];
             }
 
             // In Chrome this custom quicksort is about 3 times faster than
@@ -67,15 +67,15 @@ function mergeImages(numWorkers) {
         }
     }
 
-    allPixels = [];
     postMessage(combined.buffer, [combined.buffer]);
     close();
 }
 
 onmessage = function (message) {
-    if (message.data.numWorkers) {
-        mergeImages(message.data.numWorkers);
-    } else if (message.data.byteLength) {
-        allPixels.push(new Uint8Array(message.data));
+    var data = message.data;
+    if (data === 'start') {
+        mergeImages();
+    } else if (data.byteLength) {
+        sourceImage.push(new Uint8Array(data));
     }
 };
