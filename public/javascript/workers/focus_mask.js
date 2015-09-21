@@ -20,7 +20,7 @@ var matrixSize = matrixGaussian.length;
 function pixelByApplyingMatrix(matrix, pixelData, pixelIndex) {
     var sum = 0;
     var pixel;
-    for (pixel = 0; pixel !== matrixSize; pixel += 1) {
+    for (pixel = 0; pixel < matrixSize; pixel += 1) {
         sum += pixelData[pixelIndex + offsets[pixel]] * matrix[pixel];
     }
 
@@ -51,7 +51,7 @@ function createFocusMask(imageWidth) {
 
     // First create a blurred copy of the source image.
     calculateOffsets(4, imageWidth);
-    for (b = 0, b4 = 1; b !== dataSize; b += 1, b4 += 4) {
+    for (b = 0, b4 = 1; b < dataSize; b += 1, b4 += 4) {
         blurredImage[b] = pixelByApplyingMatrix(
             matrixGaussian,
             sourceImage,
@@ -65,7 +65,7 @@ function createFocusMask(imageWidth) {
 
     // Next create a focus mask by running edge detection on the blurred image.
     calculateOffsets(1, imageWidth);
-    for (b = 0; b !== dataSize; b += 1) {
+    for (b = 0; b < dataSize; b += 1) {
         mask[b] = abs(pixelByApplyingMatrix(
             matrixLaplacian,
             blurredImage,
@@ -79,7 +79,7 @@ function createFocusMask(imageWidth) {
 
     // Finally set the alpha channel of the source image to be a blurred version
     // of the focus mask.
-    for (b = 0, b4 = 3; b !== dataSize; b += 1, b4 += 4) {
+    for (b = 0, b4 = 3; b < dataSize; b += 1, b4 += 4) {
         sourceImage[b4] = pixelByApplyingMatrix(
             matrixGaussian,
             mask,
@@ -103,4 +103,3 @@ onmessage = function (message) {
         sourceImage = new Uint8Array(data);
     }
 };
-
