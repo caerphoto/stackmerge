@@ -13,12 +13,17 @@ define([
             'dragover .drop-overlay': 'onDragOver',
             'dragleave .drop-overlay': 'onDragLeave',
             'drop .drop-overlay': 'onDrop',
-            'click .save': 'saveImage'
+            'click .save': 'encodeCanvasImage'
         },
+        jpegWorker: new Worker('/assets/javascript/workers/jpeg_encoder.js'),
+
         initialize: function (options) {
             this.elFileInput = this.$('input.choose').get(0);
             this.$pane = this.$('.image-stack.pane');
+            this.$saveButton = this.$('.save');
             this.images = options.images;
+            this.previewModel = options.previewModel;
+            this.jpegWorker.addEventListener('message', this.onWorkerMessage.bind(this));
         },
 
         showFilePicker: function () {
@@ -52,15 +57,15 @@ define([
         filesChosen: function () {
             this.images.addFromFiles(this.elFileInput.files);
         },
-        saveImage: function () {
+        onWorkerMessage: function (message) {
             function padDigits(number) {
                 return number < 10 ? '0' + number : number;
             }
 
             var link = document.createElement('a');
-            var canvas = document.querySelector('.preview-image');
             var evt;
             var url;
+            var imageBlob;
 
             var now = new Date();
             var dateParts = [now.getMonth() + 1, now.getDate()].map(padDigits);
@@ -75,7 +80,7 @@ define([
                 'StackMerge',
                 dateParts,
                 timeParts
-            ].join(' ');
+            ].join(' ') + '.jpg';
 
             evt = document.createEvent('MouseEvents');
             evt.initMouseEvent('click', true, true, window,
@@ -83,20 +88,28 @@ define([
                 false, false, false, false,
                 0, null);
 
-            // toBlob() is much higher performance, and doesn't have the size
-            // limitations of toDataURL(), but when I wrote this only Firefox
-            // supported it.
-            if (canvas.toBlob) {
-                canvas.toBlob(function (blob) {
-                    url = URL.createObjectURL(blob);
-                    link.href = url;
-                    link.dispatchEvent(evt);
-                    URL.revokeObjectURL(url);
-                });
-            } else {
-                link.href = canvas.toDataURL('image/jpeg', 0.8);
-                link.dispatchEvent(evt);
+            imageBlob = new Blob([message.data], { type: 'image/jpeg' });
+            url = URL.createObjectURL(imageBlob);
+            link.href = url;
+            link.dispatchEvent(evt);
+
+            this.previewModel.set('progress', false);
+        },
+        encodeCanvasImage: function () {
+            var canvas = document.querySelector('.preview-image');
+            var ctx = canvas.getContext('2d');
+            var imageData;
+
+            if (this.previewModel.get('progress') !== false) {
+                return;
             }
+
+            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            this.jpegWorker.postMessage(imageData, [imageData.data.buffer]);
+            this.previewModel.set({
+                progress: 0,
+                processingMessage: 'Generating JPEG image'
+            });
         }
 
     });
