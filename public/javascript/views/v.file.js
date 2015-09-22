@@ -112,6 +112,7 @@ define([
             }
 
             imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            imageData.quality = 80;
             this.jpegWorker.postMessage(imageData, [imageData.data.buffer]);
             this.previewModel.set({
                 progress: 0,

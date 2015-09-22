@@ -728,55 +728,42 @@ function JPEGEncoder(quality) {
 
 }
 
-/* Example usage. Quality is an int in the range [0, 100]
-function example(quality){
-// Pass in an existing image from the page
-var theImg = document.getElementById('testimage');
-// Use a canvas to extract the raw image data
-var cvs = document.createElement('canvas');
-cvs.width = theImg.width;
-cvs.height = theImg.height;
-var ctx = cvs.getContext("2d");
-ctx.drawImage(theImg,0,0);
-var theImgData = (ctx.getImageData(0, 0, cvs.width, cvs.height));
-// Encode the image and get a URI back, toRaw is false by default
-var jpegURI = encoder.encode(theImgData, quality);
-var img = document.createElement('img');
-img.src = jpegURI;
-document.body.appendChild(img);
+
+/* Example usage in main thread:
+
+var progress = 0;
+var worker = new Worker('path/to/jpeg_encoder.js');
+var canvas = $('canvas')[0];
+var ctx = canvas.getContext('2d');
+var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+imageData.quality = 80; // can be 1 - 100
+
+function onWorkerMessage(message) {
+    var $link = $('a.download');
+    var blob;
+    var url;
+
+    if (message.data === null) {
+        progress += 1;
+        console.log(progress, '%');
+        return;
+    }
+
+    blob = new Blob([message.data], { type: 'image/jpeg' });
+    url = URL.createObjectURL(blob);
+    $link.prop('href', url);
+    $link.trigger('click');
 }
 
-Example usage for getting back raw data and transforming it to a blob.
-Raw data is useful when trying to send an image over XHR or Websocket,
-it uses around 30% less bytes then a Base64 encoded string. It can
-also be useful if you want to save the image to disk using a FileWriter.
+worker.addEventListener('message', onWorkerMessage);
+worker.postMessage(imageData, [imageData.data.buffer]);
 
-NOTE: The browser you are using must support Blobs
-function example(quality){
-// Pass in an existing image from the page
-var theImg = document.getElementById('testimage');
-// Use a canvas to extract the raw image data
-var cvs = document.createElement('canvas');
-cvs.width = theImg.width;
-cvs.height = theImg.height;
-var ctx = cvs.getContext("2d");
-ctx.drawImage(theImg,0,0);
-var theImgData = (ctx.getImageData(0, 0, cvs.width, cvs.height));
-// Encode the image and get a URI back, set toRaw to true
-var rawData = encoder.encode(theImgData, quality, true);
-
-blob = new Blob([rawData.buffer], {type: 'image/jpeg'});
-var jpegURI = URL.createObjectURL(blob);
-
-var img = document.createElement('img');
-img.src = jpegURI;
-document.body.appendChild(img);
-}*/
+*/
 
 var JPG = new JPEGEncoder();
 
 self.addEventListener('message', function (message) {
-    var encoded = JPG.encode(message.data);
+    var encoded = JPG.encode(message.data, message.data.quality);
     self.postMessage(encoded, [encoded]);
 }, false);
 
