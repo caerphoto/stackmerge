@@ -619,6 +619,8 @@ function JPEGEncoder(quality) {
         var x, y = 0;
         var r, g, b;
         var start,p, col,row,pos;
+        var onePercent = Math.round(height / 100 / 8);
+
         while(y < height){
             x = 0;
             while(x < quadWidth){
@@ -663,6 +665,10 @@ function JPEGEncoder(quality) {
                 x+=32;
             }
             y+=8;
+
+            if (y % onePercent === 0) {
+                self.postMessage(null);
+            }
         }
 
         ////////////////////////////////////////////////////////////////
@@ -678,6 +684,7 @@ function JPEGEncoder(quality) {
         writeWord(0xFFD9); //EOI
 
         var data = byteout.buffer.slice(0, bytePointer);
+        byteout = null;
 
         return data;
     };

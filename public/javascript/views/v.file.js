@@ -62,6 +62,11 @@ define([
                 return number < 10 ? '0' + number : number;
             }
 
+            if (message.data === null) {
+                this.previewModel.increment('progress');
+                return;
+            }
+
             var link = document.createElement('a');
             var evt;
             var url;
