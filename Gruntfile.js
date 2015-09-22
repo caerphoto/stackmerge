@@ -12,7 +12,7 @@ module.exports = function (grunt) {
                         requireLib: 'lib/require',
                         backbone: 'lib/backbone-min',
                         underscore: 'lib/underscore-min',
-                        jquery: 'lib/zepto-1.1.6.min',
+                        jquery: 'lib/jquery-custom.min',
                         mustache: 'lib/mustache.min'
                     },
                     shim: {
