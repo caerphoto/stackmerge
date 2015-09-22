@@ -87,6 +87,8 @@ define([
                 timeParts
             ].join(' ') + '.jpg';
 
+            link.target = '_blank';
+
             evt = document.createEvent('MouseEvents');
             evt.initMouseEvent('click', true, true, window,
                 0, 0, 0, 0, 0,
