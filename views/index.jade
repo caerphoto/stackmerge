@@ -3,11 +3,12 @@ html
   head
     title Stack Merge
     link(rel="shortcut icon", type="image/png", href="/assets/media/favicon.png")
-    link(rel="stylesheet", href="assets/css/main.css")
+    each path in assetPaths.css
+      link(rel="stylesheet", href="#{ path }")
 
   body
     header
-      button.load-demo-images(data-urls='#{ demoImagePaths }') Load demo images
+      button.load-demo-images(data-urls="#{ assetPaths.demoImages.join('\n') }") Load demo images
       h1 Stack Merge
 
     .image-stack.pane.drop-target
@@ -82,8 +83,15 @@ html
       </li>
       {{/ images }}
 
+    script.
+      var require = {
+        config: {
+          main: !{ JSON.stringify(assetPaths) }
+        }
+      };
+
     if (process.env.NODE_ENV === 'production')
-      script(data-main="main", src="#{ builtJSPath }")
+      script(data-main="main", src="#{ assetPaths.app }")
     else
       script(data-main="main", src="assets/javascript/lib/require.js")
       script.

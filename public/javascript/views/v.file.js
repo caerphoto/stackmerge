@@ -16,7 +16,6 @@ define([
             'drop .drop-overlay': 'onDrop',
             'click .save': 'encodeCanvasImage'
         },
-        jpegWorker: new Worker('/assets/javascript/workers/jpeg_encoder.js'),
 
         initialize: function (options) {
             this.elFileInput = this.$('input.choose').get(0);
@@ -24,7 +23,8 @@ define([
             this.$saveButton = this.$('.save');
             this.images = options.images;
             this.previewModel = options.previewModel;
-            this.jpegWorker.addEventListener('message', this.onWorkerMessage.bind(this));
+            this.jpegWorker = new Worker(options.jpegWorkerPath);
+            this.jpegWorker.onmessage = this.onWorkerMessage.bind(this);
         },
 
         showFilePicker: function () {

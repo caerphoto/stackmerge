@@ -10,13 +10,10 @@ define([
     var ImagesCollection = Backbone.Collection.extend({
         model: ImageModel,
         numImagesToLoad: 0,
-        workerPaths: {
-            focus: '/assets/javascript/workers/focus_processor.js',
-            median: '/assets/javascript/workers/median_processor.js'
-        },
         initialize: function (attrs, options) {
             this.previewModel = options.previewModel;
 
+            this.workerPaths = options.workerPaths;
             this.on('change:imageData', this.imageDataReady);
             this.on('change:maskProgress', this.updateMaskProgress);
             this.working = false;
@@ -70,6 +67,8 @@ define([
                     name: this.nameFromUrl(url),
                     id: _.uniqueId('stackmerge_'),
                     url: url
+                }, {
+                    workerPaths: this.workerPaths
                 });
             }, this);
         },
@@ -83,6 +82,8 @@ define([
                     name: file.name,
                     id: _.uniqueId('stackmerge_'),
                     file: file
+                }, {
+                    workerPaths: this.workerPaths
                 });
             }, this);
         },
@@ -120,7 +121,7 @@ define([
             // Send a copy of each image's data to the worker, then send a
             // message to signal that processing should begin.
 
-            this.worker = new Worker(this.workerPaths[mergeMode]);
+            this.worker = new Worker(this.workerPaths['merge_' + mergeMode]);
             this.worker.onmessage = function (message) {
                 this.onWorkerMessage(message.data, fnDone);
             }.bind(this);

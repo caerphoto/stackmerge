@@ -15,9 +15,10 @@ define([
             maskProgress: 0
         },
         THUMB_SIZE: 200,
-        initialize: function (attributes) {
+        initialize: function (attributes, options) {
+            this.workerPaths = options.workerPaths;
             if (attributes.file) {
-                this.loader = new Worker('/assets/javascript/workers/loader.js');
+                this.loader = new Worker(this.workerPaths.image_loader);
                 this.loader.onmessage = this.imageLoaded.bind(this);
                 this.loader.postMessage(attributes.file);
             } else {
@@ -87,7 +88,7 @@ define([
             }
 
             this.set('maskProgress', 0);
-            this.maskWorker = new Worker('/assets/javascript/workers/focus_mask.js');
+            this.maskWorker = new Worker(this.workerPaths.focus_mask);
             this.maskWorker.onmessage = function (message) {
                 if (message.data) {
                     this.maskGenerated(message.data, fnDone);

@@ -3,21 +3,38 @@ var app = express();
 var morgan = require('morgan');
 var glob = require('glob');
 var server;
-var builtJSPath;
 var host;
 
-var demoImagePaths;
+var assetPaths = {};
 
-// Detect what the current built JS file is called.
-if (process.env.NODE_ENV === 'production') {
-    builtJSPath = glob.sync('./public/javascript/application-*')[0];
-    builtJSPath = builtJSPath.replace('public', 'assets');
+function assetPath(path) {
+    return path.replace('./public', '/assets');
 }
 
-demoImagePaths = glob.sync('./public/media/demo_images/*.jpg').map(function (path) {
-    return path.replace('./public', '/assets');
-}).join('\n');
-console.log(demoImagePaths);
+// Detect timestamped asset names.
+(function () {
+    var paths;
+    var keys;
+    assetPaths.app = assetPath(glob.sync('./public/javascript/application*')[0]);
+
+    assetPaths.workers = {};
+    paths = glob.sync('./public/javascript/workers/*.T*');
+    keys = paths.map(function (path) {
+        return path.split('/').pop().split('.').shift();
+    });
+    keys.forEach(function (key, index) {
+        assetPaths.workers[key] = assetPath(paths[index]);
+    });
+
+    assetPaths.demoImages = glob.sync('./public/media/demo_images/*.jpg').
+        map(assetPath);
+
+    assetPaths.css = glob.sync('./public/css/*.T*.css').map(assetPath);
+}());
+
+if (process.env.NODE_ENV !== 'production') {
+    console.log(assetPaths);
+}
 
 app.set('view engine', 'jade');
 
@@ -28,10 +45,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.get('/', function (req, res) {
-    res.render('index', {
-        builtJSPath: builtJSPath,
-        demoImagePaths: demoImagePaths
-    });
+    res.render('index', { assetPaths: assetPaths });
 });
 
 // Recommended in production to let Apache/nginx handle serving assets.
