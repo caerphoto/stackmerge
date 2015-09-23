@@ -44,8 +44,12 @@ define([
                 throw new Error('numImagesToLoad became less than 0');
             }
         },
-        addFromFiles: function (files) {
-            this.numImagesToLoad += files.length;
+        nameFromUrl: function (url) {
+            var parts = url.split('/');
+            return parts.pop();
+        },
+        prepareToLoad: function (numImages) {
+            this.numImagesToLoad += numImages;
             this.percentPerImage = 100 / this.numImagesToLoad;
 
             if (this.numImagesToLoad === 0) {
@@ -56,6 +60,21 @@ define([
                 processingMessage: 'Loading images',
                 progress: 0
             });
+
+        },
+        addFromUrls: function (urls) {
+            this.prepareToLoad(urls.length);
+
+            urls.forEach(function (url) {
+                this.push({
+                    name: this.nameFromUrl(url),
+                    id: _.uniqueId('stackmerge_'),
+                    url: url
+                });
+            }, this);
+        },
+        addFromFiles: function (files) {
+            this.prepareToLoad(files.length);
 
             // Can't use files.forEach directly because it's not actually an
             // Array.

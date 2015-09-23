@@ -8,6 +8,7 @@ define([
         events: {
             'click button.choose': 'showFilePicker',
             'change input.choose': 'filesChosen',
+            'click button.load-demo-images': 'loadDemoImages',
             'click button.remove-all': 'removeAll',
             'dragenter .image-stack.pane': 'onDragEnter',
             'dragover .drop-overlay': 'onDragOver',
@@ -53,6 +54,10 @@ define([
             evt.preventDefault();
             this.images.addFromFiles(evt.originalEvent.dataTransfer.files);
             this.$pane.removeClass('dragging');
+        },
+        loadDemoImages: function (evt) {
+            var urls = evt.target.getAttribute('data-urls').split('\n');
+            this.images.addFromUrls(urls);
         },
         filesChosen: function () {
             this.images.addFromFiles(this.elFileInput.files);

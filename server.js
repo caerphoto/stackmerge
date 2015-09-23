@@ -6,11 +6,18 @@ var server;
 var builtJSPath;
 var host;
 
+var demoImagePaths;
+
 // Detect what the current built JS file is called.
 if (process.env.NODE_ENV === 'production') {
     builtJSPath = glob.sync('./public/javascript/application-*')[0];
     builtJSPath = builtJSPath.replace('public', 'assets');
 }
+
+demoImagePaths = glob.sync('./public/media/demo_images/*.jpg').map(function (path) {
+    return path.replace('./public', '/assets');
+}).join('\n');
+console.log(demoImagePaths);
 
 app.set('view engine', 'jade');
 
@@ -21,7 +28,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.get('/', function (req, res) {
-    res.render('index', { builtJSPath: builtJSPath });
+    res.render('index', {
+        builtJSPath: builtJSPath,
+        demoImagePaths: demoImagePaths
+    });
 });
 
 // Recommended in production to let Apache/nginx handle serving assets.

@@ -16,9 +16,13 @@ define([
         },
         THUMB_SIZE: 200,
         initialize: function (attributes) {
-            this.loader = new Worker('/assets/javascript/workers/loader.js');
-            this.loader.onmessage = this.imageLoaded.bind(this);
-            this.loader.postMessage(attributes.file);
+            if (attributes.file) {
+                this.loader = new Worker('/assets/javascript/workers/loader.js');
+                this.loader.onmessage = this.imageLoaded.bind(this);
+                this.loader.postMessage(attributes.file);
+            } else {
+                this.imageLoaded({ data: attributes.url });
+            }
         },
         generateThumbnail: function (image) {
             var thumbCanvas = document.createElement('canvas');
@@ -59,8 +63,13 @@ define([
             var image = document.createElement('img');
             image.onload = function () {
                 this.generateImageData(image);
+
+                // Will not throw even if the URL isn't actually an object URL
                 URL.revokeObjectURL(message.data);
-                this.loader.terminate();
+
+                if (this.loader) {
+                    this.loader.terminate();
+                }
             }.bind(this);
             image.src = message.data;
         },

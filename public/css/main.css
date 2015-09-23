@@ -87,6 +87,18 @@ h1 {
     line-height: 1.8;
 }
 
+header button {
+    font-size: 70%;
+    position: absolute;
+    top: 1.2em;
+    left: 1em;
+    opacity: 0.5;
+}
+
+header button:hover {
+    opacity: 1;
+}
+
 header h1::before,
 header h1::after {
     content: "\2261"; /* 'identical to' */
