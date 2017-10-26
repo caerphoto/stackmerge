@@ -1,3 +1,4 @@
+'use strict';
 define([
     'backbone'
 ], function (
@@ -6,6 +7,7 @@ define([
     var FileView = Backbone.View.extend({
         el: 'body',
         events: {
+            'click .preview.pane': 'hideLinkPanel',
             'click button.choose': 'showFilePicker',
             'change input.choose': 'filesChosen',
             'click button.load-demo-images': 'loadDemoImages',
@@ -14,13 +16,15 @@ define([
             'dragover .drop-overlay': 'onDragOver',
             'dragleave .drop-overlay': 'onDragLeave',
             'drop .drop-overlay': 'onDrop',
-            'click .save': 'encodeCanvasImage'
+            'click .save': 'encodeCanvasImage',
+            'click .download-link': 'hideLinkPanel'
         },
 
         initialize: function (options) {
             this.elFileInput = this.$('input.choose').get(0);
             this.$pane = this.$('.image-stack.pane');
             this.$saveButton = this.$('.save');
+            this.$downloadLinkPanel = this.$('.download-link-panel');
             this.images = options.images;
             this.previewModel = options.previewModel;
             this.jpegWorker = new Worker(options.jpegWorkerPath);
@@ -72,9 +76,7 @@ define([
                 return;
             }
 
-            var link = document.createElement('a');
-            var evt;
-            var url;
+            var link = this.$downloadLinkPanel.find('a.download-link')[0];
             var imageBlob;
 
             var now = new Date();
@@ -91,21 +93,22 @@ define([
                 dateParts,
                 timeParts
             ].join(' ') + '.jpg';
+            imageBlob = new Blob([message.data], { type: 'image/jpeg' });
+            link.href = URL.createObjectURL(imageBlob);
 
             link.target = '_blank';
+            link.appendChild(document.createTextNode('Click to download image'));
 
-            evt = document.createEvent('MouseEvents');
-            evt.initMouseEvent('click', true, true, window,
-                0, 0, 0, 0, 0,
-                false, false, false, false,
-                0, null);
-
-            imageBlob = new Blob([message.data], { type: 'image/jpeg' });
-            url = URL.createObjectURL(imageBlob);
-            link.href = url;
-            link.dispatchEvent(evt);
+            this.$downloadLinkPanel.toggleClass('visible', true);
+            link.focus();
 
             this.previewModel.set('progress', false);
+        },
+        showLinkPanel: function () {
+            this.$downloadLinkPanel.toggleClass('visible', true);
+        },
+        hideLinkPanel: function () {
+            this.$downloadLinkPanel.toggleClass('visible', false);
         },
         encodeCanvasImage: function () {
             var canvas = document.querySelector('.preview-image');

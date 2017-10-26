@@ -162,7 +162,7 @@ input[type="checkbox"]::after {
 }
 
 input[type="checkbox"]:checked::after {
-    content: "\2716";
+    content: "✔";
 }
 
 label {
@@ -465,6 +465,31 @@ ol.image-stack .remove {
     padding: 1em;
     opacity: 0.3;
     z-index: 1;
+}
+
+.download-link-panel {
+    z-index: 1;
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 8em;
+    width: 34em;
+    margin-top: -4em;
+    margin-left: -17em;
+    padding: 1em 2em;
+}
+
+.download-link-panel p {
+    margin-bottom: 0.5em;
+}
+
+.download-link-panel a {
+    color: #b70;
+}
+
+.download-link-panel.visible {
+    display: block;
 }
 
 .preview.has-images .controls-group {
