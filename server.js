@@ -15,6 +15,7 @@ function assetPath(path) {
 (function () {
     var paths;
     var keys;
+    var rxTimestamped = /\.T\d+\./;
     assetPaths.app = assetPath(glob.sync('./public/javascript/application*')[0]);
 
     assetPaths.workers = {};
@@ -29,7 +30,14 @@ function assetPath(path) {
     assetPaths.demoImages = glob.sync('./public/media/demo_images/*.jpg').
         map(assetPath);
 
-    assetPaths.css = glob.sync('./public/css/*.T*.css').map(assetPath);
+    if (process.env.NODE_ENV === 'production') {
+        assetPaths.css = glob.sync('./public/css/*.T*.css').map(assetPath);
+    } else {
+        assetPaths.css = glob.sync('./public/css/*.css').map(assetPath)
+            .filter(function (path) {
+                return !rxTimestamped.test(path);
+            });
+    }
 }());
 
 if (process.env.NODE_ENV !== 'production') {
