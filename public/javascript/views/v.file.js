@@ -95,9 +95,7 @@ define([
             ].join(' ') + '.jpg';
             imageBlob = new Blob([message.data], { type: 'image/jpeg' });
             link.href = URL.createObjectURL(imageBlob);
-
             link.target = '_blank';
-            link.appendChild(document.createTextNode('Click to download image'));
 
             this.$downloadLinkPanel.toggleClass('visible', true);
             link.focus();
